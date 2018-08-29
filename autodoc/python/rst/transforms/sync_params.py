@@ -58,7 +58,7 @@ class SyncParametersWithSpec(DocumentTransform):
 
         # For methods except static ones we ignore first argument (self or cls)
         # Static method has no such arg.
-        if args and not definition.is_static:
+        if args and definition.is_method and not definition.is_static:
             args = args[1:]
 
         for arg in args:
