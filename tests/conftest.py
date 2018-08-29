@@ -233,6 +233,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
 
     definition = create_definition(
         name='test_func',
+        kind=1,
         start_line=1,
         start_col=1,
         bodystart=1,
