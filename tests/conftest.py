@@ -135,6 +135,8 @@ def create_definition(**kwargs):
         1,      # start_line
         1,      # start_col
         None,   # inherited_from
+        None,   # compound_id
+        None,   # compound_kind
         None,   # filename
         '',     # language
         *doc    # *other
@@ -204,6 +206,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
                 s.update(settings)
             settings = s
 
+    keep_transforms = kw.pop('keep_transforms', False)
     pass_lines = kw.pop('pass_lines', True)
 
     domain = PythonDomain()
@@ -240,8 +243,12 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
         bodyend=3,
         args=kw.get('args', ()),
         filename='<string>',
+        compound_id=kw.pop('compound_id', None),
+        compound_kind=kw.pop('compound_kind', None),
         doc_block_docstring=text
     )
+
+
 
     db = Mock()
 
@@ -253,12 +260,14 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
             # We don't need any extra modifications, because key point is to
             # test document-to-text translator.
             style = domain.get_style(domain.settings['style'])
-            style.transforms = []
+            if not keep_transforms:
+                style.transforms = []
 
             domain.reporter.env = env
 
             handler = domain.create_definition_handler(env)
-            handler.transforms = kw.pop('transforms', None)
+            if not keep_transforms or 'transforms' in kw:
+                handler.transforms = kw.pop('transforms', None)
             handler.setup()
             handler.build_document()
 
@@ -345,6 +354,7 @@ def search_params_in(src):
     add_if_defined(kwargs, src, 'style', prefix)
     add_if_defined(kwargs, src, 'settings', prefix)
     add_if_defined(kwargs, src, 'transforms', prefix)
+    add_if_defined(kwargs, src, 'keep_transforms', prefix)
     return kwargs
 
 
