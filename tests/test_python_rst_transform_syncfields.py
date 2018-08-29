@@ -289,6 +289,7 @@ class TestDocstringSyncParams:
 
         env = parse_py_doc(
             args=args,
+            compound_kind='class',  # Use method instead of function.
             text="""
             This is an ordinary paragraph.
 
