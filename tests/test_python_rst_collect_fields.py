@@ -36,8 +36,8 @@ class TestDocstringParamField:
             .. note:: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             """
         )
-        doc = env['definition'].doc_block.document
 
+        doc = env['definition'].doc_block.document
         assert hasattr(doc, 'field_sections')
 
         section = doc.field_sections.get('params')
