@@ -35,7 +35,7 @@ class SyncParametersWithSpec(DocumentTransform):
 
         # Is this docstring missing?
         # If yes then we don't report about missing stuff.
-        is_missing = self.document.get('missing', False)
+        is_missing = self.env.get('missing', False)
 
         # Add params section if not exists but don't save in sections for
         # a moment.
@@ -58,7 +58,7 @@ class SyncParametersWithSpec(DocumentTransform):
 
         # For methods except static ones we ignore first argument (self or cls)
         # Static method has no such arg.
-        if args and definition.is_static:
+        if args and not definition.is_static:
             args = args[1:]
 
         for arg in args:
@@ -107,4 +107,4 @@ class SyncParametersWithSpec(DocumentTransform):
 
         for name, (_, node) in param_map.items():
             self.reporter.add_report(Codes.UNKNOWN,
-                       'Unknown parameter [{}]'.format(name))
+                                     'Unknown parameter [{}]'.format(name))
