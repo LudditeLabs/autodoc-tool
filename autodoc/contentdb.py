@@ -120,19 +120,21 @@ class Definition:
                  'is_protectedsettable', 'accessor', 'is_addable',
                  'is_removable', 'is_raisable', 'kind', 'bodystart', 'bodyend',
                  'id_bodyfile', 'id_file', 'start_line', 'start_col',
-                 'inherited_from', 'filename', 'language', 'args', 'doc_block'
+                 'inherited_from', 'compound_id', 'compound_kind', 'filename',
+                 'language', 'args', 'doc_block'
                  ]
 
-    def __init__(self, args, id, refid, name, definition, type, argsstring, scope,
-                 initializer, bitfield, read, write, visibility, static, const,
-                 explicit, inline, final, sealed, new, optional, required,
-                 volatile, virtual, mutable, initonly, attribute, property,
-                 readonly, bound, constrained, transient, maybevoid,
+    def __init__(self, args, id, refid, name, definition, type, argsstring,
+                 scope, initializer, bitfield, read, write, visibility, static,
+                 const, explicit, inline, final, sealed, new, optional,
+                 required, volatile, virtual, mutable, initonly, attribute,
+                 property, readonly, bound, constrained, transient, maybevoid,
                  maybedefault, maybeambiguous, readable, writable, gettable,
                  privategettable, protectedgettable, settable, privatesettable,
                  protectedsettable, accessor, addable, removable, raisable,
                  kind, bodystart, bodyend, id_bodyfile, id_file, start_line,
-                 start_col, inherited_from, filename, language, *other):
+                 start_col, inherited_from, compound_id, compound_kind,
+                 filename, language, *other):
         self.id                     = id
         self.refid                  = refid
         self.name                   = name
@@ -194,6 +196,8 @@ class Definition:
         self.start_line             = start_line
         self.start_col              = start_col
         self.inherited_from         = inherited_from
+        self.compound_id            = compound_id       # ID of parent compound
+        self.compound_kind          = compound_kind     # its kind
         self.filename               = filename
         self.language               = language
         self.args                   = args
@@ -211,6 +215,10 @@ class Definition:
         if self.doc_block.start_line is not None:
             return self.doc_block.start_line, self.doc_block.start_col
         return self.start_line, self.start_col
+
+    @property
+    def is_method(self):
+        return self.compound_kind == 'class'
 
 
 class ContentDb:
@@ -236,12 +244,14 @@ class ContentDb:
         m.privategettable, m.protectedgettable, m.settable, m.privatesettable,
         m.protectedsettable, m.accessor, m.addable, m.removable, m.raisable,
         m.kind, m.bodystart, m.bodyend, m.id_bodyfile, m.id_file, m.line,
-        m.column, m.inherited_from,
+        m.column, m.inherited_from, m.id_compound, c.kind,
         f.name,f.language,
         d.rowid, d.id_member, d.kind, d.id_file, d.start_line, d.start_col,
         d.end_line, d.end_col, d.docstring, d.doc              
-        FROM memberdef m LEFT JOIN files f ON f.rowid=m.id_file
+        FROM memberdef m
+        LEFT JOIN files f ON f.rowid=m.id_file
         LEFT JOIN docblocks d ON d.id_member=m.rowid
+        LEFT JOIN compounddef c ON m.id_compound = c.rowid
         """)
 
         for row in res:
