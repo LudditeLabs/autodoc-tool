@@ -85,7 +85,7 @@ class SyncParametersWithSpec(DocumentTransform):
 
             else:
                 # Check types.
-                if arg.type_list is not None:
+                if arg.type_list:
                     type_list = param.get('type')
                     if type_list != arg.type_list:
                         param['type'] = arg.type_list
