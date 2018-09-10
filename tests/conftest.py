@@ -194,7 +194,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
     if defaultkw:
         # Merge params.
         defaultkw.update(kw)
-        kw = defaultkw
+        kw = defaultkw.copy()
 
         # Override style.
         style = kw.pop('style', style)
@@ -230,7 +230,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
     # enclosing code.
     settings.setdefault('line_width', 68)
 
-    settings_builder.add_from_dict({'py': {style: settings}})
+    settings_builder.add_from_dict({'py': {style: settings, 'style': style}})
 
     context.settings = settings_builder.get_settings()
 
