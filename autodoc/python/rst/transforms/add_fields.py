@@ -5,6 +5,7 @@ from ....docstring.nodes import invisible_marker
 
 class AddDocstringSections(AddCollectedSectionsBase):
     """Add collected sections back to the document."""
+
     def process_params(self, section):
         separate_type = self.env['settings'].get('separate_param_type', False)
 
