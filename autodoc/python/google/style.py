@@ -4,6 +4,8 @@ from ..style_napoleon import NapoleonStyleTransform, NapoleonStyle
 from ...utils import get_indent
 from ..napoleon import GoogleDocstring
 from .translator import DocumentToGoogleTranslator
+from .transforms.add_fields import AddDocstringSections
+from .transforms.collect_fields import CollectGoogleSections
 
 
 class FromGoogleStyleTransform(NapoleonStyleTransform):
@@ -101,3 +103,4 @@ class GoogleStyle(NapoleonStyle):
 
     document_translator_cls = DocumentToGoogleTranslator
     docstring_transform_cls = FromGoogleStyleTransform
+    transforms = (CollectGoogleSections, AddDocstringSections)
