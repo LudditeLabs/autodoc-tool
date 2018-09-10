@@ -3,15 +3,17 @@
 import os.path as op
 from setuptools import setup, find_packages
 
-def get_version(fname='autodoc/__init__.py'):
+
+def get_version(fname='src/autodoc/__init__.py'):
     with open(fname) as f:
         for line in f:
             if line.startswith('__version__'):
                 return eval(line.split('=')[-1])
 
 
-def read(fname):
-    return open(op.join(op.dirname(__file__), fname)).read()
+def read(*parts, **kwargs):
+    return open(op.join(op.dirname(__file__), *parts),
+                encoding=kwargs.get('encoding', 'utf-8')).read()
 
 
 setup(
@@ -22,12 +24,14 @@ setup(
     author='Luddite Labs',
     author_email='autodoc@ludditelabs.io',
     url='http://autodoc.io',
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    zip_safe=True,
     license='',
     install_requires=[
-        'click==6.7',
-        'docutils==0.14',
-        'PyYAML==3.13'
+        'click',
+        'docutils',
+        'PyYAML'
     ],
     entry_points={
         'console_scripts': ['autodoc=autodoc.cli:cli']
