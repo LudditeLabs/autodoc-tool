@@ -176,7 +176,7 @@ def side_by_side(left_lines, right_lines, left_text='', right_text='',
             ' | ',
 
             # Add right line.
-                                                    right or ''
+            right or ''
         ]
 
         lines.append(''.join(parts))
