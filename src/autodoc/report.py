@@ -31,7 +31,7 @@ _levels = {
 }
 
 
-class Codes(object):
+class Codes:
     """Report codes."""
 
     # -- Docstring analysis codes ---------------------------------------------
