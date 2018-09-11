@@ -1,5 +1,5 @@
 from docutils import nodes
-from ...docstring.nodes import docstring_section, seealso
+from ...docstring.nodes import docstring_section
 from ..rst.translator import DocumentToRstTranslator
 
 

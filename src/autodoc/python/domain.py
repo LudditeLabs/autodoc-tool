@@ -1,4 +1,3 @@
-from docutils.transforms import Transformer
 from ..domain import SkipProcessing, LanguageDomain, DefinitionHandler
 from .rst import RstStyle
 from .google import GoogleStyle

@@ -1,6 +1,5 @@
 from docutils.readers import Reader as _Reader
 from docutils.io import StringInput
-from functools import reduce
 
 
 class Reader(_Reader):
