@@ -1,5 +1,5 @@
 # Test: comments.
-class TestRstComments:
+class TestComments:
     # Test: comments.
     def test_directive_comment(self, assert_py_doc):
         assert_py_doc(

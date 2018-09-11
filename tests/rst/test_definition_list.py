@@ -1,5 +1,5 @@
 # Test: definition lists.
-class TestRstDefinitionList:
+class TestDefinitionList:
     def test_def_list(self, assert_py_doc):
         assert_py_doc(
             text="""

@@ -1,5 +1,5 @@
 # Test: paragraphs and block quotes.
-class TestRstParagraphAndBq:
+class TestParagraphAndBq:
     # Test: common paragraphs and block quotes.
     # NOTE: currently multiple blank lines are ignored.
     def test_paragraph(self, assert_py_doc):

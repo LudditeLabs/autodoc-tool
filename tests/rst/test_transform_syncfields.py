@@ -9,7 +9,7 @@ from autodoc.report import Codes
 docstring_transforms = [CollectInfoFields, SyncParametersWithSpec]
 
 
-class TestDocstringSyncParams:
+class TestSyncParams:
     def test_no_params(self, parse_py_doc):
         env = parse_py_doc(
             # def test_func(name, type)

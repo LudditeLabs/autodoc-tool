@@ -6,12 +6,12 @@ docstring_keep_transforms = True
 
 # TODO: add more tests.
 # Test: convert python docstring to plan reStructuredText.
-class TestPythonStyleRst:
+class TestStyleRst:
     # Test: complex docstring.
     def test_complex(self, assert_py_doc):
         args = (Arg('sender', ['str']),
                 Arg('recipient', ['str']),
-                Arg('message_body', ['str']),
+                    Arg('message_body', ['str']),
                 Arg('priority', ['integer', 'float']))
 
         assert_py_doc(

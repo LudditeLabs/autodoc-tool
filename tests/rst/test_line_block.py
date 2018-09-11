@@ -1,5 +1,5 @@
 # Test: line block.
-class TestRstLiteralBlockList:
+class TestLineBlock:
     # Test: simple line block.
     def test_simple(self, assert_py_doc):
         assert_py_doc(

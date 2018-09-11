@@ -8,7 +8,7 @@ from autodoc.docstring.textblock import (
 
 
 # Test: BaseBlock - base class for text block.
-class TestDocstringBaseBlock:
+class TestBaseBlock:
     # Test: BaseBlock constructor.
     def test_construct(self):
         b = BaseBlock()
@@ -32,7 +32,7 @@ class TestDocstringBaseBlock:
 
 
 # Test: LineBlock - block of lines without wrapping.
-class TestDocstringLineBlock:
+class TestLineBlock:
     # Test: LineBlock constructor.
     def test_construct(self):
         b = LineBlock()
@@ -134,7 +134,7 @@ class TestDocstringLineBlock:
 
 
 # Test: WrapBlock - block of lines with wrapping.
-class TestDocstringWrapBlock:
+class TestWrapBlock:
     # Test: LineBlock constructor.
     def test_construct(self):
         b = WrapBlock()
@@ -398,7 +398,7 @@ class TestDocstringWrapBlock:
 
 
 # Test: how WrapBlock handles various punctuations.
-class TestDocstringWrapBlockPunctuation:
+class TestWrapBlockPunctuation:
     # Test: one line simple cases.
     # data: last string is expected text line
     #       and others are words; list means boxed word.
@@ -483,7 +483,7 @@ class TestDocstringWrapBlockPunctuation:
 
 
 # Test: BlockManager.
-class TestDocstringBlockManager:
+class TestBlockManager:
     # Test: construct.
     def test_construct(self):
         m = BlockManager()

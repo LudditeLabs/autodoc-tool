@@ -1,5 +1,5 @@
 # Test: options list.
-class TestRstOptList:
+class TesOptList:
     # Test: if we don't pass source lines info and width.
     # * Left side option width must be 15
     # * Options with long descriptions have 1 blank line margin

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 
 # Test: inline markup roles + unknown roles.
-class TestPythonRstRole:
+class TestRole:
     # Test: inline markups with disabled shorten option.
     #
     # :emphasis:

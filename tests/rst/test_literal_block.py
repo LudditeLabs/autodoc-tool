@@ -1,5 +1,5 @@
 # Test: literal block.
-class TestRstLiteralBlockList:
+class TestLiteralBlock:
     # Test: literal block without info about source lines.
     # It must add '::' on new line if last text doesn't end with ':'
     def test_no_src(self, assert_py_doc):

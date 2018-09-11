@@ -17,7 +17,7 @@
 
 
 # Test: field lists.
-class TestRstFieldList:
+class TestFieldList:
     def test_simple(self, assert_py_doc):
         assert_py_doc(
             text="""

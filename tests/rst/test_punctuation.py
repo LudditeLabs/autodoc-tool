@@ -1,7 +1,7 @@
 # TODO: add more tests.
 # Test: convert document to text when punctuation
 # and enclosing chars exists near boxed words.
-class TestRstPunctuation:
+class TestPunctuation:
     def test_simple(self, assert_py_doc):
         assert_py_doc(
             settings=dict(line_width=80),

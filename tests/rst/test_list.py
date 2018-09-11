@@ -1,5 +1,5 @@
 # Test: bullet and enumerated lists.
-class TestRstList:
+class TestLists:
     # Test: test bullet lists
     # A text block which begins with a "*", "+", "-".
     # followed by whitespace, is a bullet list item

@@ -1,5 +1,5 @@
 # Test: doctest block.
-class TestRstDoctest:
+class TestDoctest:
     def test_simple(self, assert_py_doc):
         assert_py_doc(
             """

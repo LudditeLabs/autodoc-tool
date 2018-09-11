@@ -8,7 +8,7 @@ def pass_lines(request):
 
 
 # Test: common admonition.
-class TestRstAdmonitionCommon:
+class TestCommon:
     def test_complex(self, assert_py_doc, pass_lines):
         assert_py_doc(
             settings=dict(admonition_on_first_line=None, admonition_indent=0),
@@ -103,7 +103,7 @@ class TestRstAdmonitionCommon:
 
 
 # Test: admonition 'attention'.
-class TestRstAdmonitionAttention:
+class TesAttention:
     def test_autodetect_first_line(self, assert_py_doc, pass_lines):
         settings = dict(admonition_on_first_line=None, admonition_indent=0,
                         line_width=80)
@@ -207,7 +207,7 @@ class TestRstAdmonitionAttention:
 
 
 # Test: remaining admonitions.
-class TestRstAdmonitionRemaining:
+class TestRemaining:
     def test(self, assert_py_doc, pass_lines):
         settings = dict(admonition_on_first_line=False,
                         admonition_blank_line=False,

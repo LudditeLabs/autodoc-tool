@@ -8,7 +8,7 @@ docstring_transforms = [CollectInfoFields]
 
 # Test: convert :param: and :type: to <param_field> and move them to the
 # doc parts.
-class TestDocstringParamField:
+class TestParamField:
     # Test: parameters and their types.
     def test_fields(self, parse_py_doc):
         env = parse_py_doc(
@@ -205,7 +205,7 @@ class TestDocstringParamField:
 
 # Test: convert :keyword: and :kwtype: to <keyword_field> and move them to the
 # doc parts.
-class TestDocstringKwField:
+class TestKwField:
     # Test: parameters and their types.
     def test_fields(self, parse_py_doc):
         env = parse_py_doc(
@@ -399,7 +399,7 @@ class TestDocstringKwField:
 
 # Test: convert :return: and :rtype: to <returns_field> and move them to the
 # doc parts.
-class TestDocstringReturnField:
+class TestReturnField:
     def test_fields(self, parse_py_doc):
         env = parse_py_doc(
             text="""
@@ -543,7 +543,7 @@ class TestDocstringReturnField:
 
 # Test: convert :raises: rtype: to <raises_field> and move them to the
 # doc parts.
-class TestDocstringRaisesField:
+class TestRaisesField:
     def test_fields(self, parse_py_doc):
         env = parse_py_doc(
             text="""
@@ -671,7 +671,7 @@ class TestDocstringRaisesField:
 
 
 # Test: convert :Yields: <yields_field> and move them to the doc parts.
-class TestDocstringYieldsField:
+class TestYieldsField:
     def test_fields(self, parse_py_doc):
         env = parse_py_doc(
             text="""

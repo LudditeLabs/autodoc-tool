@@ -1,5 +1,5 @@
 # Test: sections
-class TestRstSection:
+class TestSection:
     # Test: sections with source code lines passed.
     def test_sections_with_src(self, assert_py_doc):
         assert_py_doc(

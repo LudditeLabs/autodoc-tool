@@ -1,5 +1,5 @@
 # Test: references and targets.
-class TestRstReference:
+class TestReference:
     # Test: reference nodes with disabled shorten option.
     def test_pep_rfc_refs_long(self, assert_py_doc):
         assert_py_doc(

@@ -6,7 +6,7 @@ docstring_transforms = [CollectGoogleSections]
 
 
 # TODO: improve me, these tests are very simple and stupid.
-class TestCollectGooleSections:
+class TestCollectSections:
     def test_notes(self, parse_py_doc):
         env = parse_py_doc(
             text="""

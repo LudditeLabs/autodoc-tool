@@ -1,5 +1,5 @@
 # Test: test unknown roles and directives.
-class TestRstUnknown:
+class TestUnknown:
     # Test: unknown roles.
     def test_role(self, assert_py_doc):
         # 'acronym' is known role, but not supported by the CommonTranslator

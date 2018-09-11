@@ -5,7 +5,7 @@ docstring_keep_transforms = True
 
 
 # Test: how translation from document to Google style works. Args section.
-class TestPythonGoogleStyleAgs:
+class TestAgs:
     # Test: simple situation - function with 2 params with description.
     def test_simple(self, assert_py_doc):
         assert_py_doc(
@@ -205,7 +205,7 @@ class TestPythonGoogleStyleAgs:
 
 
 # Test: how translation from document to Google style works. Returns section.
-class TestPythonGoogleStyleReturns:
+class TestReturns:
     def test_simple(self, assert_py_doc):
         assert_py_doc(
             text="""
@@ -364,7 +364,7 @@ class TestPythonGoogleStyleReturns:
 
 
 # Test: how translation from document to Google style works. Raises section.
-class TestPythonGoogleStyleRaises:
+class TestRaises:
     # Test: simple case.
     def test_simple(self, assert_py_doc):
         assert_py_doc(
@@ -463,7 +463,7 @@ class TestPythonGoogleStyleRaises:
             """)
 
 
-class TestPythonGoogleStyleYields:
+class TestYields:
     def test_simple(self, assert_py_doc):
         assert_py_doc(
             text="""
@@ -532,7 +532,7 @@ class TestPythonGoogleStyleYields:
 # * Note/Notes
 # * Examples
 # * References
-class TestPythonGoogleStyleAdmonitions:
+class TestAdmonitions:
     def test_note(self, assert_py_doc):
         assert_py_doc(
             text="""
@@ -664,7 +664,7 @@ class TestPythonGoogleStyleAdmonitions:
             """)
 
 
-class TestPythonGoogleStyleSeeAlso:
+class TestSeeAlso:
     def test(self, assert_py_doc):
         assert_py_doc(
             text="""
@@ -697,7 +697,7 @@ class TestPythonGoogleStyleSeeAlso:
             """)
 
 
-class TestPythonGoogleStyleTodo:
+class TestTodo:
     def test(self, assert_py_doc):
         assert_py_doc(
             text="""
@@ -731,7 +731,7 @@ class TestPythonGoogleStyleTodo:
             """)
 
 
-class TestPythonGoogleStyleWarnings:
+class TestWarnings:
     # For single directive title must be 'Warning'
     def test(self, assert_py_doc):
         assert_py_doc(
