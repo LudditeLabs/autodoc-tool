@@ -134,4 +134,3 @@ class UnknownMixin:
 
     def depart_autodoc_unknown_directive(self, node):
         self.close_block()
-

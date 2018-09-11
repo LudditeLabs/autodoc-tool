@@ -54,9 +54,9 @@ class RstStyle(DocstringStyle):
         ('Separate field blocks (params, returns, raises) with a blank line',
          'separate_info_fields', False),
 
-        ('Params tag', 'params_tag', 'param', C('parameter', 'param')),     # rst_params_tag
-        ('Returns tag', 'returns_tag', 'returns', C('return', 'returns')),  # rst_returns_tag
-        ('Raises tag', 'raises_tag', 'raises', C('raise', 'raises')),       # rst_raises_tag
+        ('Params tag', 'params_tag', 'param', C('parameter', 'param')),
+        ('Returns tag', 'returns_tag', 'returns', C('return', 'returns')),
+        ('Raises tag', 'raises_tag', 'raises', C('raise', 'raises')),
     )
 
     document_translator_cls = DocumentToRstTranslator

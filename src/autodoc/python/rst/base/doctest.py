@@ -14,6 +14,7 @@ over Doctest block syntax.
 http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#doctest-blocks
 """
 
+
 class DoctestMixin:
     def visit_doctest_block(self, node):
         self.open_block(top_margin=1, bottom_margin=1, no_wrap=True)

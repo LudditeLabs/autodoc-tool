@@ -3,7 +3,7 @@ from docutils.transforms import Transform
 
 class DocumentTransform(Transform):
     """Base document transform."""
-    
+
     default_priority = 999
 
     def __init__(self, document, startnode=None):

@@ -54,7 +54,8 @@ class ContentDbBuilder:
             :class:`ContentDb` instance.
         """
         if not op.exists(self._exe):
-            raise ContentDbError('Content DB builder is not found: %s' % self._exe)
+            raise ContentDbError('Content DB builder is not found: %s'
+                                 % self._exe)
 
         temp_dir = tempfile.mkdtemp()
 

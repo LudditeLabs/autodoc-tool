@@ -44,11 +44,11 @@ class DocumentToTextTranslatorBase(nodes.NodeVisitor):
 
     def after_depart_document(self, document, lines):
         """Modify result lines after document is translated.
-        
+
         Args:
             document: Docstring document.
             lines: List of result docstring lines.
-            
+
         Returns:
             List of docstring lines.
         """
