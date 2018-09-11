@@ -115,6 +115,7 @@ def cli(ctx, verbose, fix, builder, db, out, exclude, exclude_pattern, config,
 
     try:
         context.analyze(content_db)
+        content_db.save_settings(settings_builder.settings)
         content_db.finalize()
     except AutodocError as e:
         raise click.ClickException(str(e))

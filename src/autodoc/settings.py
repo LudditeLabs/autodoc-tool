@@ -2,6 +2,7 @@ from textwrap import dedent
 import os.path as op
 import json
 import yaml
+import copy
 from contextlib import contextmanager
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -387,7 +388,7 @@ class SettingsBuilder:
         d.dump(stream)
 
     def get_settings(self):
-        return SettingsWrapper(InheritDict(self.settings))
+        return SettingsWrapper(InheritDict(copy.deepcopy(self.settings)))
 
 
 class DumpSettings(object):

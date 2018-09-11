@@ -4,6 +4,7 @@ import sys
 import sqlite3
 import subprocess
 import tempfile
+import json
 from collections import namedtuple
 
 
@@ -246,6 +247,9 @@ class ContentDb:
             self._conn = sqlite3.connect(self.filename)
         return self._conn
 
+    def finalize(self):
+        self.conn.commit()
+
     def get_definitions(self):
         res = self.conn.execute("""SELECT
         m.rowid, m.refid, m.name, m.definition, m.type, m.argsstring, m.scope,
@@ -302,5 +306,10 @@ class ContentDb:
             UPDATE OR FAIL docblocks SET docstring = ? WHERE rowid=?
             """, (doc.docstring, definition.doc_block.id))
 
-    def finalize(self):
-        self.conn.commit()
+    def save_settings(self, settings):
+        """Save settings in the DB."""
+        self.conn.execute("""
+        CREATE TABLE IF NOT EXISTS meta(name TEXT UNIQUE, value TEXT)
+        """)
+        self.conn.execute('INSERT OR REPLACE INTO meta VALUES(?,?)',
+                          ('settings', json.dumps(settings)))
