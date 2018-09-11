@@ -14,7 +14,7 @@ class TestRole:
     def test_basic_inline_markup_long(self, assert_py_doc):
         assert_py_doc(
             settings=dict(shorten_inline=False, line_width=None),
-            text="""
+            text=r"""
             Test inline markup roles.
 
             Long roles:
