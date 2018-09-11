@@ -1,10 +1,5 @@
 import pytest
-from autodoc.docstring.textblock import (
-    BaseBlock,
-    LineBlock,
-    WrapBlock,
-    BlockManager
-)
+from autodoc.textblock import BaseBlock, LineBlock, WrapBlock, BlockManager
 
 
 # Test: BaseBlock - base class for text block.

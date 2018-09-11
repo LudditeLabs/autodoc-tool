@@ -1,5 +1,5 @@
 from docutils import nodes
-from .textblock import BlockManager
+from ..textblock import BlockManager
 from .utils import need_blank
 
 
