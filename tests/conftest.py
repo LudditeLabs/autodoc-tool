@@ -33,8 +33,7 @@ class TestContext(Context):
         log = logging.getLogger('testcontext')
         super(TestContext, self).__init__(log)
 
-    def build_content_db(self, filename, paths, exclude, exclude_patterns,
-                         builder):
+    def build_content_db(self, filename, paths, exclude, exclude_patterns, exe):
         pass
 
     def get_content_db(self, filename):

@@ -33,8 +33,8 @@ class SettingsOption(click.Option):
         return value
 
 
-def get_content_db(context, paths, exclude, exclude_patterns, builder,
-                   db_filename, out):
+def get_content_db(context, paths, exclude, exclude_patterns, exe, db_filename,
+                   out):
     try:
         if db_filename is None:
             if not paths:
@@ -42,7 +42,7 @@ def get_content_db(context, paths, exclude, exclude_patterns, builder,
                     'At least one path must be specified.')
             db = context.build_content_db(out, paths, exclude=exclude,
                                           exclude_patterns=exclude_patterns,
-                                          builder=builder)
+                                          exe=exe)
         else:
             db = context.get_content_db(db_filename)
     except ContentDbError as e:
@@ -111,7 +111,7 @@ def cli(ctx, verbose, fix, builder, db, out, exclude, exclude_pattern, config,
 
     content_db = get_content_db(context, paths=path, exclude=exclude,
                                 exclude_patterns=exclude_pattern,
-                                builder=builder, db_filename=db, out=out)
+                                exe=builder, db_filename=db, out=out)
 
     try:
         context.analyze(content_db)

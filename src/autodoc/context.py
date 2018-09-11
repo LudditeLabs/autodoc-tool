@@ -16,20 +16,44 @@ class Context(SettingsSpec):
         self.settings_spec_nested = []
 
     def register(self, domain):
+        """Register language domain.
+
+        Args:
+            domain: :class:`LanguageDomain` instance.
+        """
         if domain.name in self.domains:
             raise ValueError('Already registered: %s' % domain.name)
         self.domains[domain.name] = domain
         domain.context = self
         self.settings_spec_nested.append(domain)
 
-    def build_content_db(self, filename, paths, exclude, exclude_patterns,
-                         builder):
-        db_builder = ContentDbBuilder(self.logger, exe=builder)
+    def build_content_db(self, filename, paths, exclude, exclude_patterns, exe):
+        """Build content DB for the given paths.
+
+        Args:
+            filename: Output content DB filename.
+            paths: Paths to process.
+            exclude: List of paths to exclude.
+            exclude_patterns: List of patterns to exclude.
+            exe: External executable to build content DB.
+
+        Returns:
+            :class:`ContentDb` instance.
+        """
+        db_builder = ContentDbBuilder(self, exe=exe)
         return db_builder.build(filename, paths, exclude=exclude,
                                 exclude_patterns=exclude_patterns)
 
     def get_content_db(self, filename):
-        return ContentDb(filename)
+        """Construct :class:`ContentDb` for the given filename.
+
+        Args:
+            filename: Content DB filename.
+
+        Returns:
+            :class:`ContentDb` instance.
+        """
+        return ContentDb(self, filename)
 
     def analyze(self, content_db):
         """Analyse given content DB.

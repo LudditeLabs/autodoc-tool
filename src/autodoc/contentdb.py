@@ -13,13 +13,24 @@ class ContentDbError(Exception):
 
 # TODO: add feature to update existing DB.
 class ContentDbBuilder:
-    """Content database builders.
+    """Content DB builder.
 
     It creates a database from input paths.
     """
-    def __init__(self, logger, exe=None):
-        self.logger = logger
+    def __init__(self, context, exe=None):
+        """Construct content DB builder.
+
+        Args:
+            context: Application context :class:`Context`.
+            exe: External executable to build content DB.
+        """
+        self.context = context
         self._exe = exe or self._get_exe()
+
+    @property
+    def logger(self):
+        """Logger."""
+        return self.context.logger
 
     def _get_exe(self):
         """Build filename to execute."""
@@ -79,7 +90,7 @@ class ContentDbBuilder:
         if not op.exists(output):
             raise ContentDbError('Error creating content DB %s' % output)
 
-        return ContentDb(output)
+        return ContentDb(self.context, output)
 
 
 class DocBlock:
@@ -224,7 +235,8 @@ class Definition:
 
 class ContentDb:
     """This class represents content database."""
-    def __init__(self, filename):
+    def __init__(self, context, filename):
+        self.context = context
         self.filename = filename
         self._conn = None
 
