@@ -9,7 +9,7 @@ class Context(SettingsSpec):
         logger: Logger instance.
     """
     def __init__(self, logger):
-        super(SettingsSpec, self).__init__()
+        super(Context, self).__init__()
         self.logger = logger
         self.settings = None
         self.domains = {}
