@@ -12,8 +12,7 @@ def get_version(fname='src/autodoc/__init__.py'):
 
 
 def read(*parts, **kwargs):
-    return open(op.join(op.dirname(__file__), *parts),
-                encoding=kwargs.get('encoding', 'utf-8')).read()
+    return open(op.join(op.dirname(__file__), *parts)).read()
 
 
 setup(
