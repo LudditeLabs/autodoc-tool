@@ -3,6 +3,7 @@ from docutils.transforms import Transformer
 from .report import DomainReporter
 from .settings import SettingsSpec
 from .docstring.builder import DocumentBuilder
+from .patch import Patch, FilePatcher
 
 
 class SkipProcessing(Exception):
@@ -223,3 +224,28 @@ class LanguageDomain(SettingsSpec):
                 pass
 
             self.reporter.reset()
+
+    def prepare_to_sync(self, docblock):
+        pass
+
+    def sync_sources(self, content_db):
+        """Sync sources with content in the given DB.
+
+        Args:
+            content_db: Content DB instance.
+        """
+
+        with self.settings.from_key('style'):
+            for id, filename in content_db.get_domain_files(self):
+                patcher = FilePatcher(filename)
+
+                # Create patches.
+                for docblock in content_db.get_doc_blocks(id):
+                    self.prepare_to_sync(docblock)
+                    if docblock.docstring is not None:
+                        patch = Patch(docblock.docstring, docblock.start_line,
+                                      docblock.start_col, docblock.end_line,
+                                      docblock.end_col)
+                        patcher.add(patch)
+
+                patcher.patch()

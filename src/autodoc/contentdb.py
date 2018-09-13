@@ -313,3 +313,42 @@ class ContentDb:
         """)
         self.conn.execute('INSERT OR REPLACE INTO meta VALUES(?,?)',
                           ('settings', json.dumps(settings)))
+
+    def get_languages(self):
+        """Get files languages.
+
+        Returns:
+            List of languages.
+        """
+        res = self.conn.execute('SELECT DISTINCT language FROM files')
+        return [x[0] for x in res]
+
+    def get_domain_files(self, domain):
+        """Get files supported by the given domain.
+
+        Args:
+            domain: Language domain.
+
+        Yields:
+            Tuples ``(file_id, filename)``.
+        """
+        res = self.conn.execute('SELECT rowid,name FROM files WHERE language=?',
+                                (domain.name,))
+        yield from res
+
+    def get_doc_blocks(self, file_id):
+        """Get doc blocks for the given file.
+
+        Args:
+            file_id: File ID.
+
+        Yields:
+            :class:`DocBlock` instances.
+        """
+        res = self.conn.execute("""
+        SELECT rowid, id_member, kind, id_file, start_line,
+        start_col, end_line, end_col, docstring FROM docblocks WHERE id_file=?
+        """, (file_id,))
+
+        for row in res:
+            yield DocBlock(*row, None)

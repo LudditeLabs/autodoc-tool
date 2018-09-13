@@ -100,3 +100,19 @@ class PythonDomain(LanguageDomain):
 
     def __init__(self):
         super(PythonDomain, self).__init__()
+
+    def prepare_to_sync(self, docblock):
+        quote = self.settings['docstring_quote']
+        docblock.docstring = quote + docblock.docstring + quote
+        # if docblock.end_line is None:
+        #     docblock.start_line += 1
+        # lines = docblock.docstring.split('\n')
+        #
+        # lines[0] = quote + lines[0]
+        # lines[-1] = lines[-1] + quote
+        #
+        # offset = ' ' * (docblock.start_col - 1)
+        # for i in range(1, len(lines)):
+        #     lines[i] = offset + lines[i]
+        #
+        # docblock.docstring = '\n'.join(lines)

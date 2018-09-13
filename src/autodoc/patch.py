@@ -115,15 +115,21 @@ class LinePatcher:
         return lines
 
 
-            # Add right part if required.
-            #
-            # 'end' is index of remaining chars from the right side
-            # of the last line.
-            end = len(lines[patch.end_line - 1]) - patch.end_col + 1
-            if end:
-                newtxt += txt[-end:]
+class FilePatcher:
+    def __init__(self, filename, encoding=None):
+        self._filename = filename
+        self._encoding = encoding
+        self._patcher = LinePatcher()
 
-            # Convert back to lines and replace original ones.
-            lines[s] = newtxt.splitlines(False)
+    def add(self, patch):
+        self._patcher.add(patch)
 
-        return '\n'.join(lines)
+    def patch(self):
+        in_ = FileInput(source_path=self._filename, encoding=self._encoding)
+        content = in_.read()
+        content = self._patcher.patch(content)
+        print('\n'.join(content))
+
+        # out = FileOutput(destination_path=self._filename,
+        #                  encoding=self._encoding)
+        # out.write(content)

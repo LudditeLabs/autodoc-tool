@@ -66,3 +66,15 @@ class Context(SettingsSpec):
             if domain is not None:
                 with self.settings.with_settings(domain.settings_section):
                     domain.process_definition(content_db, definition)
+
+    def sync_sources(self, content_db):
+        """Sync sources with content in the given DB.
+
+        Args:
+            content_db: Content DB instance.
+        """
+        for lang in content_db.get_languages():
+            domain = self.domains.get(lang)
+            if domain is not None:
+                with self.settings.with_settings(domain.settings_section):
+                    domain.sync_sources(content_db)
