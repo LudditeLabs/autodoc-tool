@@ -86,6 +86,21 @@ def trim_docstring(text, strip_leading=False, strip_trailing=False,
         return trimmed
 
 
+def as_lines(content):
+    """This function splits given ``content`` into lines if it's a string or
+    returns it as is if it's a list.
+
+    Args:
+        content: String or list of strings.
+
+    Returns:
+        List of strings.
+    """
+    if isinstance(content, list):
+        return content
+    return content.split('\n')
+
+
 def get_line_indent(lines, pos):
     """Get text line indentation.
 
