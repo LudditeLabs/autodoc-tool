@@ -1,6 +1,6 @@
 import pytest
 from functools import partial
-from autodoc.patch import Patch, ContentPatcher
+from autodoc.patch import Patch, LinePatcher
 from autodoc.utils import trim_docstring
 
 trim = partial(trim_docstring, strip_leading=True, strip_trailing=True,
@@ -12,24 +12,24 @@ class TestPatch:
     # Test: construct patch.
     def test_construct(self):
         patch = Patch('1\n2', 1, 2, 3, 4)
-        assert patch.content == '1\n2'
+        assert patch.lines == ['1', '2']
         assert patch.start_line == 1
         assert patch.start_col == 2
         assert patch.end_line == 3
         assert patch.end_col == 4
 
 
-# Test: ContentPatcher class.
-class TestContentPatcher:
+# Test: LinePatcher class.
+class TestLinePatcher:
     # Test: construct patcher.
     def test_construct(self):
-        patcher = ContentPatcher()
+        patcher = LinePatcher()
         assert patcher._patches == []
         assert patcher._sorted is False
 
     # Test: add patch.
     def test_add(self):
-        patcher = ContentPatcher()
+        patcher = LinePatcher()
 
         patch = Patch('', 1, 1, 1, 1)
         patcher.add(patch)
@@ -39,7 +39,7 @@ class TestContentPatcher:
 
     # Test: add multiple patches.
     def test_add_multiple(self):
-        patcher = ContentPatcher()
+        patcher = LinePatcher()
 
         patch = Patch('', 1, 1, 1, 1)
         patcher.add(patch)
@@ -52,7 +52,7 @@ class TestContentPatcher:
 
     # Test: reset sorted flag on patch adding.
     def test_reset_sorted(self):
-        patcher = ContentPatcher()
+        patcher = LinePatcher()
         patcher._sorted = True
 
         patch = Patch('', 1, 1, 1, 1)
@@ -63,7 +63,7 @@ class TestContentPatcher:
 
     # Test: sort patches (in reverse mode).
     def test_sort(self):
-        patcher = ContentPatcher()
+        patcher = LinePatcher()
 
         p1 = Patch('', 1, 1, 1, 1)
         p2 = Patch('', 4, 1, 5, 1)
@@ -80,98 +80,365 @@ class TestContentPatcher:
     # Test: apply empty list of patches. Must return the same content.
     def test_patch_empty(self):
         content = trim_docstring("""
-        """, strip_leading=True, as_string=True)
+        """, strip_leading=True, as_string=False)
 
-        patcher = ContentPatcher()
+        patcher = LinePatcher()
         assert patcher.patch(content) is content
 
 
-# Test: patching text.
+# Test: original content without indentation.
 class TestPatching:
-    # Original text.
-    text = trim("""
-    Line 1
-    Line 2
-    Line 3
-    Line 4
-    Line 5
-    """)
+    content = trim("""
+        line 1
+        line 2
+        line 3
+        line 4
+        line 5
+        """)
 
     @pytest.mark.parametrize("patches,expected", [
-
-        # Single patch.
-
-        # Test: replace two lines with a single one.
-        # NOTE: end col is too big, but it's fine.
-        ([Patch('!hello!', 2, 1, 3, 70)],
+        # Patch one line with single line.
+        ([Patch("xxx", 2, 1, 2, 7)],
          """
-         Line 1
-         !hello!
-         Line 4
-         Line 5
+         line 1
+         xxx
+         line 3
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines with single line.
+        ([Patch("xxx", 2, 1, 3, 7)],
+         """
+         line 1
+         xxx
+         line 4
+         line 5
+         """
+         ),
+        # Patch one line partially with single line.
+        ([Patch("xxx", 2, 3, 2, 5)],
+         """
+         line 1
+         li
+         xxx
+          2
+         line 3
+         line 4
+         line 5
+         """
+         ),
+        # Patch one line partially with single line.
+        ([Patch("xxx", 2, 3, 2, 7)],
+         """
+         line 1
+         li
+         xxx
+         line 3
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with single line.
+        ([Patch("xxx", 2, 3, 3, 7)],
+         """
+         line 1
+         li
+         xxx
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with single line.
+        ([Patch("xxx", 2, 1, 3, 4)],
+         """
+         line 1
+         xxx
+         e 3
+         line 4
+         line 5
+         """
+         ),
+        # Add single line after the position.
+        ([Patch("xxx", 2, 1, None, None)],
+         """
+         line 1
+         line 2
+         xxx
+         line 3
+         line 4
+         line 5
          """
          ),
 
-        # Test: replace two lines partially.
-        ([Patch('!hello!', 2, 1, 3, 5)],
+        # Patch one line with multiple lines.
+        ([Patch("xxx\nyyy", 2, 1, 2, 7)],
          """
-         Line 1
-         !hello! 3
-         Line 4
-         Line 5
-         """
-         ),
-
-        # Test: insert a text to the beginning of the line.
-        ([Patch('!hello!', 2, 1, 2, 1)],
-         """
-         Line 1
-         !hello!Line 2
-         Line 3
-         Line 4
-         Line 5
+         line 1
+         xxx
+         yyy
+         line 3
+         line 4
+         line 5
          """
          ),
-
-        # Test: insert multiple lines to the beginning of the line
-        ([Patch('!hello!\n123', 2, 1, 2, 1)],
+        # Patch 2 lines with multiple lines.
+        ([Patch("xxx\nyyy", 2, 1, 3, 7)],
          """
-         Line 1
-         !hello!
-         123Line 2
-         Line 3
-         Line 4
-         Line 5
+         line 1
+         xxx
+         yyy
+         line 4
+         line 5
          """
          ),
-
-        # Test: replace a line partially with two lines.
-        ([Patch('!hello!\n1-', 2, 1, 2, 3)],
+        # Patch one line partially with multiple lines.
+        ([Patch("xxx\nyyy", 2, 3, 2, 5)],
          """
-         Line 1
-         !hello!
-         1-ne 2
-         Line 3
-         Line 4
-         Line 5
+         line 1
+         li
+         xxx
+         yyy
+          2
+         line 3
+         line 4
+         line 5
          """
          ),
-
-        # Multiple patches.
-
-        ([Patch('--', 1, 2, 1, 5), Patch('!hello!\n123', 2, 1, 2, 1)],
+        # Patch one line partially with multiple lines.
+        ([Patch("xxx\nyyy", 2, 3, 2, 7)],
          """
-         L-- 1
-         !hello!
-         123Line 2
-         Line 3
-         Line 4
-         Line 5
+         line 1
+         li
+         xxx
+         yyy
+         line 3
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with multiple lines.
+        ([Patch("xxx\nyyy", 2, 3, 3, 7)],
+         """
+         line 1
+         li
+         xxx
+         yyy
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with multiple lines.
+        ([Patch("xxx\nyyy", 2, 1, 3, 4)],
+         """
+         line 1
+         xxx
+         yyy
+         e 3
+         line 4
+         line 5
+         """
+         ),
+        # Add multiple lines after the position.
+        ([Patch("xxx\nyyy", 2, 1, None, None)],
+         """
+         line 1
+         line 2
+         xxx
+         yyy
+         line 3
+         line 4
+         line 5
          """
          ),
     ])
     def test_patch(self, patches, expected):
-        patcher = ContentPatcher()
+        patcher = LinePatcher()
         for p in patches:
             patcher.add(p)
-        assert patcher.patch(self.text) == trim(expected)
+        assert '\n'.join(patcher.patch(self.content)) == trim(expected)
+
+    content_indented = trim("""
+        line 1
+        line 2
+          line 3
+        line 4
+        line 5
+        """)
+
+    @pytest.mark.parametrize("patches,expected", [
+        # Patch one line with single line.
+        # NOTE: here indent = 0 even if replaced line has indentation,
+        # because start col = 1.
+        ([Patch("xxx", 3, 1, 3, 9)],
+         """
+         line 1
+         line 2
+         xxx
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines with single line.
+        ([Patch("xxx", 3, 1, 4, 7)],
+         """
+         line 1
+         line 2
+         xxx
+         line 5
+         """
+         ),
+        # Patch one line partially with single line.
+        # NOTE: right part of the line will have the same indentation.
+        ([Patch("xxx", 3, 5, 3, 5)],
+         """
+         line 1
+         line 2
+           li
+           xxx
+           ne 3
+         line 4
+         line 5
+         """
+         ),
+        # Patch one line partially with single line.
+        ([Patch("xxx", 3, 5, 3, 7)],
+         """
+         line 1
+         line 2
+           li
+           xxx
+            3
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with single line.
+        ([Patch("xxx", 3, 5, 4, 7)],
+         """
+         line 1
+         line 2
+           li
+           xxx
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with single line.
+        ([Patch("xxx", 3, 1, 4, 4)],
+         """
+         line 1
+         line 2
+         xxx
+         e 4
+         line 5
+         """
+         ),
+        # Add single line after the position.
+        ([Patch("xxx", 3, 1, None, None)],
+         """
+         line 1
+         line 2
+           line 3
+         xxx
+         line 4
+         line 5
+         """
+         ),
+        # Add single line after the position.
+        # NOTE: indentation detected from the start column of the patch.
+        ([Patch("xxx", 3, 4, None, None)],
+         """
+         line 1
+         line 2
+           line 3
+            xxx
+         line 4
+         line 5
+         """
+         ),
+
+        # Patch one line with multiple lines.
+        ([Patch("xxx\nyyy", 3, 3, 3, 100)],
+         """
+         line 1
+         line 2
+           xxx
+           yyy
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines with multiple lines.
+        ([Patch("xxx\nyyy", 3, 3, 4, 9)],
+         """
+         line 1
+         line 2
+           xxx
+           yyy
+         line 5
+         """
+         ),
+        # Patch one line partially with multiple lines.
+        ([Patch("xxx\nyyy", 3, 5, 3, 5)],
+         """
+         line 1
+         line 2
+           li
+           xxx
+           yyy
+           ne 3
+         line 4
+         line 5
+         """
+         ),
+        # Patch one line partially with multiple lines.
+        ([Patch("xxx\nyyy", 3, 5, 3, 9)],
+         """
+         line 1
+         line 2
+           li
+           xxx
+           yyy
+         line 4
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with multiple lines.
+        ([Patch("xxx\nyyy", 3, 3, 4, 7)],
+         """
+         line 1
+         line 2
+           xxx
+           yyy
+         line 5
+         """
+         ),
+        # Patch 2 lines partially with multiple lines.
+        ([Patch("xxx\nyyy", 3, 1, 4, 4)],
+         """
+         line 1
+         line 2
+         xxx
+         yyy
+         e 4
+         line 5
+         """
+         ),
+        # Add multiple lines after the position.
+        ([Patch("xxx\nyyy", 3, 2, None, None)],
+         """
+         line 1
+         line 2
+           line 3
+          xxx
+          yyy
+         line 4
+         line 5
+         """
+         ),
+    ])
+    def test_patch_indented(self, patches, expected):
+        patcher = LinePatcher()
+        for p in patches:
+            patcher.add(p)
+        assert '\n'.join(patcher.patch(self.content_indented)) == trim(expected)
