@@ -31,7 +31,7 @@
             :raises Other: bla bla2
 """
 
-import collections
+from collections.abc import Callable
 import inspect
 import re
 from .iterators import modify_iter
@@ -137,7 +137,7 @@ class GoogleDocstring(UnicodeMixin):
                 what = 'class'
             elif inspect.ismodule(obj):
                 what = 'module'
-            elif isinstance(obj, collections.Callable):
+            elif isinstance(obj, Callable):
                 what = 'function'
             else:
                 what = 'object'
