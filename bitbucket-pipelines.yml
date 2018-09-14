@@ -1,5 +1,5 @@
 # Check guides at https://confluence.atlassian.com/x/x4UWN for more examples.
-image: ludditelabs/multipy
+image: ludditelabs/pyenv-multipy
 
 pipelines:
   default:
