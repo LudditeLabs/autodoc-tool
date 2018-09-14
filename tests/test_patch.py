@@ -96,6 +96,104 @@ class TestPatching:
         line 5
         """)
 
+    # Test: insert patch before the line.
+    @pytest.mark.parametrize("patches,expected", [
+        ([Patch("xxx", 1, 1, None, None)],
+         """
+         xxx
+         line 1
+         line 2
+         line 3
+         line 4
+         line 5
+         """
+         ),
+        ([Patch("xxx", 3, 1, None, None)],
+         """
+         line 1
+         line 2
+         xxx
+         line 3
+         line 4
+         line 5
+         """
+         ),
+        ([Patch("xxx", 5, 1, None, None)],
+         """
+         line 1
+         line 2
+         line 3
+         line 4
+         xxx
+         line 5
+         """
+         ),
+        ([Patch("xxx", 6, 1, None, None)],  # Note: 6 - is out of bounds.
+         """
+         line 1
+         line 2
+         line 3
+         line 4
+         line 5
+         xxx
+         """
+         ),
+    ])
+    def test_insert_before(self, patches, expected):
+        patcher = LinePatcher(insert_after=False)
+        for p in patches:
+            patcher.add(p)
+        assert '\n'.join(patcher.patch(self.content)) == trim(expected)
+
+    # Test: insert patch before the line.
+    @pytest.mark.parametrize("patches,expected", [
+        ([Patch("xxx", 1, 1, None, None)],
+         """
+         line 1
+         xxx
+         line 2
+         line 3
+         line 4
+         line 5
+         """
+         ),
+        ([Patch("xxx", 3, 1, None, None)],
+         """
+         line 1
+         line 2
+         line 3
+         xxx
+         line 4
+         line 5
+         """
+         ),
+        ([Patch("xxx", 5, 1, None, None)],
+         """
+         line 1
+         line 2
+         line 3
+         line 4
+         line 5
+         xxx
+         """
+         ),
+        ([Patch("xxx", 6, 1, None, None)],  # Note: 6 - is out of bounds.
+         """
+         line 1
+         line 2
+         line 3
+         line 4
+         line 5
+         xxx
+         """
+         ),
+    ])
+    def test_insert_after(self, patches, expected):
+        patcher = LinePatcher()  # Insert after the line is default.
+        for p in patches:
+            patcher.add(p)
+        assert '\n'.join(patcher.patch(self.content)) == trim(expected)
+
     @pytest.mark.parametrize("patches,expected", [
         # Patch one line with single line.
         ([Patch("xxx", 2, 1, 2, 7)],

@@ -35,9 +35,10 @@ class LinePatcher:
     If a patch inserts content in the middle of a line then the line is
     split into two lines and the content inserts between them.
     """
-    def __init__(self):
+    def __init__(self, insert_after=True):
         self._patches = []
         self._sorted = False
+        self._insert_after = insert_after
 
     def _sort_patches(self):
         """Sort patches in reverse order based on start positions."""
@@ -71,7 +72,10 @@ class LinePatcher:
                     patch_lines = [offset + x for x in patch.lines]
                 else:
                     patch_lines = patch.lines
-                lines[patch.start_line:patch.start_line] = patch_lines
+                pos = patch.start_line
+                if not self._insert_after:
+                    pos -= 1
+                lines[pos:pos] = patch_lines
                 continue
 
             col = patch.start_col - 1
@@ -105,10 +109,7 @@ class LinePatcher:
             if last_part and not last_part.isspace():
                 if first_indent:
                     last_part = ' ' * first_indent + last_part
-                if to_insert:
-                    to_insert.append(last_part)
-                else:
-                    to_insert = [last_part]
+                to_insert.append(last_part)
 
             lines[start:end] = to_insert
 
