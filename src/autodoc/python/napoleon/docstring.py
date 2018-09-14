@@ -51,7 +51,7 @@ _enumerated_list_regex = re.compile(
     r'(?(paren)\)|\.)(\s+\S|\s*$)')
 
 
-class UnicodeMixin(object):
+class UnicodeMixin:
     """Mixin class to handle defining the proper __str__/__unicode__
     methods in Python 2 or 3."""
 
