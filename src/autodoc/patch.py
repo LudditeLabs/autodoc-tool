@@ -6,11 +6,15 @@ from .utils import as_lines, get_indent
 
 
 class Patch:
-    """This class represents a content patch."""
+    """This class represents a patch."""
     __slots__ = ('lines', 'start_line', 'start_col', 'end_line', 'end_col')
 
     def __init__(self, content, start_line, start_col, end_line, end_col):
         """Construct patch.
+
+        If ``end_line`` and ``end_col`` are not set (``None``) then ``lines``
+        will be inserted to ``start_line`` or after it (depending on patcher
+        flag ``insert_after``).
 
         Args:
             content: String or list of strings.
@@ -36,6 +40,11 @@ class LinePatcher:
     split into two lines and the content inserts between them.
     """
     def __init__(self, insert_after=True):
+        """Construct patcher.
+
+        Args:
+            insert_after: Insert patch after the source line.
+        """
         self._patches = []
         self._sorted = False
         self._insert_after = insert_after
@@ -56,6 +65,14 @@ class LinePatcher:
 
     # NOTE: positions in patch are 1-based.
     def patch(self, content):
+        """Patch given ``content``.
+
+        Args:
+            content: String or list of strings.
+
+        Returns:
+            Patched list of strings.
+        """
         lines = as_lines(content)
 
         if not self._patches:
@@ -117,20 +134,34 @@ class LinePatcher:
 
 
 class FilePatcher:
-    def __init__(self, filename, encoding=None):
+    """This class applies patches to a file."""
+    def __init__(self, filename, encoding=None, insert_after=True):
+        """Construct file patcher.
+
+        Args:
+            filename: Filename to patch.
+            encoding: File encoding.
+            insert_after: Insert patch after the source line.
+        """
         self._filename = filename
         self._encoding = encoding
-        self._patcher = LinePatcher()
+        self._patcher = LinePatcher(insert_after=insert_after)
 
     def add(self, patch):
+        """Add patch.
+
+        Args:
+            patch: :class:`Patch` instance.
+        """
         self._patcher.add(patch)
 
     def patch(self):
+        """Apply patches and write changes to specified file."""
         in_ = FileInput(source_path=self._filename, encoding=self._encoding)
         content = in_.read()
         content = self._patcher.patch(content)
-        print('\n'.join(content))
+        content = '\n'.join(content)
 
-        # out = FileOutput(destination_path=self._filename,
-        #                  encoding=self._encoding)
-        # out.write(content)
+        out = FileOutput(destination_path=self._filename,
+                         encoding=self._encoding)
+        out.write(content)
