@@ -104,7 +104,7 @@ class ContentDbBuilder:
                 cmd.extend(('-x', path))
 
         if file_patterns:
-            cmd.append(('-p', ';'.join(file_patterns)))
+            cmd.extend(('-p', ';'.join(file_patterns)))
 
         cmd += paths
 

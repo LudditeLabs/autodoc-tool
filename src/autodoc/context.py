@@ -41,8 +41,16 @@ class Context(SettingsSpec):
             :class:`ContentDb` instance.
         """
         db_builder = ContentDbBuilder(self, exe=exe)
+
+        # Process files supported by registered domains only.
+        file_patterns = []
+        for domain in self.domains.values():
+            if domain.extensions:
+                file_patterns.extend(['*' + x for x in domain.extensions])
+
         return db_builder.build(filename, paths, exclude=exclude,
-                                exclude_patterns=exclude_patterns)
+                                exclude_patterns=exclude_patterns,
+                                file_patterns=file_patterns)
 
     def get_content_db(self, filename):
         """Construct :class:`ContentDb` for the given filename.
