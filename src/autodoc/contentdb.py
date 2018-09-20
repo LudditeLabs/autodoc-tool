@@ -73,14 +73,16 @@ class ContentDbBuilder:
                 'PYTHONPATH': lib_dir + os.pathsep + lib_zip
             }
 
-    def build(self, output, paths, exclude=None, exclude_patterns=None):
+    def build(self, output, paths, exclude=None, exclude_patterns=None,
+              file_patterns=None):
         """Build content database.
 
         Args:
             output: Output content DB filename.
             paths: List of paths to process.
             exclude: List of paths or filenames to exclude.
-            exclude_patterns: Patterns to exclude.
+            exclude_patterns: Wildcard patterns to exclude.
+            file_patterns: Files wildcard patterns.
 
         Returns:
             :class:`ContentDb` instance.
@@ -95,11 +97,14 @@ class ContentDbBuilder:
 
         if exclude:
             for path in exclude:
-                cmd.extend(['-e', path])
+                cmd.extend(('-e', path))
 
         if exclude_patterns:
             for path in exclude_patterns:
-                cmd.extend(['-x', path])
+                cmd.extend(('-x', path))
+
+        if file_patterns:
+            cmd.append(('-p', ';'.join(file_patterns)))
 
         cmd += paths
 
