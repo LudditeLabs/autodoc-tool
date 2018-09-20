@@ -53,6 +53,26 @@ class ContentDbBuilder:
 
         return cmd
 
+    def _get_env(self):
+        """Get environment vars for the external builder exe.
+
+        Returns:
+            Dict with environment variables or ``None``.
+
+        Notes:
+            If ``CONTENT_BUILDER_NOENV`` environment variable is set then
+            returns ``None``.
+        """
+        # These vars used by contentdb tool to correctly load python modules.
+        if 'CONTENT_BUILDER_NOENV' not in os.environ:
+            this_dir = op.abspath(op.dirname(sys.argv[0]))
+            lib_dir = op.join(this_dir, 'lib')
+            lib_zip = op.join(lib_dir, 'library.zip')
+            return {
+                'PYTHONHOME': this_dir,
+                'PYTHONPATH': lib_dir + os.pathsep + lib_zip
+            }
+
     def build(self, output, paths, exclude=None, exclude_patterns=None):
         """Build content database.
 
@@ -84,7 +104,7 @@ class ContentDbBuilder:
         cmd += paths
 
         try:
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd, check=True, env=self._get_env())
         except subprocess.CalledProcessError:
             raise ContentDbError
 
