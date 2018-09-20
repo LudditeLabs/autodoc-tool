@@ -34,13 +34,13 @@ class SettingsOption(click.Option):
 
 
 def get_content_db(context, paths, exclude, exclude_patterns, exe, db_filename,
-                   out):
+                   out_db):
     try:
         if db_filename is None:
             if not paths:
                 raise click.ClickException(
                     'At least one path must be specified.')
-            db = context.build_content_db(out, paths, exclude=exclude,
+            db = context.build_content_db(out_db, paths, exclude=exclude,
                                           exclude_patterns=exclude_patterns,
                                           exe=exe)
         else:
@@ -74,7 +74,7 @@ def init(logger):
               help='Content DB builder executable.')
 @click.option('--db', type=click.Path(dir_okay=False, exists=True),
               help='Content DB to process.')
-@click.option('--out', '-o', type=click.Path(dir_okay=False),
+@click.option('--out-db', type=click.Path(dir_okay=False),
               default='content.db', show_default=True,
               help='Output content DB.')
 @click.option('--exclude', '-e', multiple=True, metavar='PATH',
@@ -89,8 +89,8 @@ def init(logger):
               multiple=True)
 @click.argument('path', type=click.Path(exists=True), nargs=-1)
 @click.pass_context
-def cli(ctx, verbose, fix, builder, db, out, exclude, exclude_pattern, config,
-        dump_settings, s, path):
+def cli(ctx, verbose, fix, builder, db, out_db, exclude, exclude_pattern,
+        config, dump_settings, s, path):
     """Autodoc tool."""
 
     logger = create_logger(verbose)
@@ -111,7 +111,7 @@ def cli(ctx, verbose, fix, builder, db, out, exclude, exclude_pattern, config,
 
     content_db = get_content_db(context, paths=path, exclude=exclude,
                                 exclude_patterns=exclude_pattern,
-                                exe=builder, db_filename=db, out=out)
+                                exe=builder, db_filename=db, out_db=out_db)
 
     try:
         context.analyze(content_db)
