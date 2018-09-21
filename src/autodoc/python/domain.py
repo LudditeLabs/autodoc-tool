@@ -1,9 +1,5 @@
-from ..domain import (
-    SkipProcessing,
-    LanguageDomain,
-    DefinitionHandler,
-    SyncHandler
-)
+from ..domain import LanguageDomain
+from ..task import SkipProcessing, DefinitionHandlerTask, FileSyncTask
 from .rst import RstStyle
 from .google import GoogleStyle
 from .numpy import NumpyStyle
@@ -12,7 +8,7 @@ from .rst.transforms.collect_fields import CollectInfoFields
 from .rst.transforms.sync_params import SyncParametersWithSpec
 
 
-class PyDefinitionHandler(DefinitionHandler):
+class PyDefinitionHandlerTask(DefinitionHandlerTask):
     transforms = (MarkMissingDocstring, CollectInfoFields,
                   SyncParametersWithSpec)
 
@@ -43,12 +39,11 @@ class PyDefinitionHandler(DefinitionHandler):
         #   def bar_1():
         #       pass
 
+        super(PyDefinitionHandlerTask, self).setup()
         # This is one line function, skip processing.
         if self.definition.bodyend - self.definition.bodystart <= 1:
             raise SkipProcessing
-
         self.normalize_doc_block()
-        super(PyDefinitionHandler, self).setup()
 
     def normalize_doc_block(self):
         doc = self.definition.doc_block
@@ -64,7 +59,7 @@ class PyDefinitionHandler(DefinitionHandler):
             doc.end_col = None
 
 
-class PySyncHandler(SyncHandler):
+class PyFileSyncTask(FileSyncTask):
     def prepare(self, docblock):
         # Surround docstring with quotes.
         quote = self.settings['docstring_quote']
@@ -107,9 +102,10 @@ class PythonDomain(LanguageDomain):
         RstStyle, GoogleStyle, NumpyStyle
     )
 
-    definition_handler = PyDefinitionHandler
-    sync_handler = PySyncHandler
     docstring_styles = (RstStyle, GoogleStyle, NumpyStyle)
+
+    definition_handler_task = PyDefinitionHandlerTask
+    file_sync_task = PyFileSyncTask
 
     def __init__(self):
         super(PythonDomain, self).__init__()

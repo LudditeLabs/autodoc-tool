@@ -1,152 +1,6 @@
-from functools import reduce
-from docutils.transforms import Transformer
 from .report import DomainReporter
 from .settings import SettingsSpec
-from .docstring.builder import DocumentBuilder
-from .patch import Patch, FilePatcher
-
-
-class SkipProcessing(Exception):
-    pass
-
-
-class BaseHandler(SettingsSpec):
-    """Base class for handlers."""
-    def __init__(self, domain, env):
-        """Create handler.
-
-        Args:
-            domain: :class:`LanguageDomain` instance.
-            env: Processing environment dict.
-        """
-        self.domain = domain
-        self.env = env
-        self.settings = env['settings']
-
-    def setup(self):
-        """Setup handler."""
-        pass
-
-    def teardown(self):
-        """Tear down handler."""
-        self.env = None
-        self.domain = None
-
-    def do_handle(self):
-        raise NotImplementedError
-
-    def handle(self):
-        self.setup()
-        self.do_handle()
-        self.teardown()
-
-
-class DefinitionHandler(BaseHandler):
-    """Base class for the definition handlers.
-
-    "Definition" represents some entity like function, class, method etc.
-    """
-
-    #: Document builder class.
-    document_builder = DocumentBuilder
-
-    #: Document transforms.
-    transforms = None
-
-    def __init__(self, domain, env):
-        """Create handler.
-
-        Args:
-            domain: :class:`LanguageDomain` instance.
-            env: Processing environment dict.
-        """
-        super(DefinitionHandler, self).__init__(domain, env)
-        self.definition = self.env['definition']
-
-    def apply_styles(self):
-        """Apply styles transforms to docstring before document building.
-
-        This method applies the transforms only if docstring exists and document
-        tree is not prebuilt.
-        """
-        doc_block = self.definition.doc_block
-        if doc_block.docstring is not None and doc_block.document is None:
-            text = doc_block.docstring
-            text = reduce(lambda t, f: f(t, self.env),
-                          self.domain._styles_transforms, text)
-            doc_block.docstring = text
-
-    def build_document(self):
-        """Build document tree from the docstring stored in the ``env``.
-
-        This method puts document tree to``definition.doc_block.document``.
-        """
-        self.apply_styles()
-        # Don't parse docstring if document tree already present
-        # (if document is already present in the content DB).
-        if self.definition.doc_block.document is None:
-            builder = self.document_builder(self.env)
-            self.definition.doc_block.document = builder.get_document()
-
-    def apply_transforms(self):
-        """Apply transforms on current document tree."""
-        if self.transforms:
-            transformer = Transformer(self.definition.doc_block.document)
-            transformer.add_transforms(self.transforms)
-            transformer.apply_transforms()
-
-    def translate_document_to_docstring(self):
-        """Translate document tree to text representation using style specified
-        in the ``env['settings']['style']`` and update ``definition``.
-
-        Translation is performed by style specified in settings.
-        """
-        style_name = self.env['settings']['style']
-        style = self.domain.get_style(style_name)
-        assert style is not None
-        self.definition.doc_block.docstring = style.to_string(self.env)
-
-    def save_changes(self):
-        """Save changes made by the handler to content DB."""
-        self.env['db'].save_doc_block(self.definition)
-
-    def do_handle(self):
-        self.build_document()
-        self.apply_transforms()
-        self.translate_document_to_docstring()
-        self.save_changes()
-
-
-class SyncHandler(BaseHandler):
-    def __init__(self, domain, env):
-        super(SyncHandler, self).__init__(domain, env)
-        self.file_id = self.env['file_id']
-        self.filename = self.env['filename']
-        self.patcher = None
-
-    def setup(self):
-        """Setup handler."""
-        super(SyncHandler, self).setup()
-        self.patcher = FilePatcher(self.filename)
-
-    def teardown(self):
-        filename = self.env.get('out_filename') or self.filename
-        self.patcher.patch(filename)
-        self.patcher = None
-        super(SyncHandler, self).teardown()
-
-    def prepare(self, docblock):
-        pass
-
-    def do_handle(self):
-        # Create patches.
-        for docblock in self.env['db'].get_doc_blocks(self.file_id):
-            self.prepare(docblock)
-            if docblock.docstring is not None:
-                patch = Patch(docblock.docstring, docblock.start_line,
-                              docblock.start_col, docblock.end_line,
-                              docblock.end_col)
-                self.patcher.add(patch)
+from .task import SkipProcessing
 
 
 class LanguageDomain(SettingsSpec):
@@ -202,9 +56,9 @@ class LanguageDomain(SettingsSpec):
         ),
     )
 
-    definition_handler = None
-    sync_handler = None
     docstring_styles = None
+    definition_handler_task = None
+    file_sync_task = None
 
     def __init__(self):
         self.reporter = DomainReporter(self)
@@ -243,57 +97,78 @@ class LanguageDomain(SettingsSpec):
         """
         return self._styles_map.get(name)
 
-    def create_env(self, content_db, **kwargs):
-        """Create processing environment dict.
+    def create_env(self, **kwargs):
+        """Create task environment dict.
 
         Args:
-            content_db: Content DB instance.
             **kwargs: Extra env vars.
 
         Returns:
-            Processing environment dict.
+            Task environment dict.
         """
         env = {
-            'db': content_db,
+            'db': kwargs.pop('content_db'),
             'reporter': self.reporter,
             'settings': self.settings,
         }
         env.update(kwargs)
         return env
 
-    def create_definition_handler(self, env):
-        return self.definition_handler(self, env)
+    def create_task(self, name, env):
+        """Create task.
 
-    def create_sync_handler(self, env):
-        return self.sync_handler(self, env)
+        This method creates instance of a class specified in the attribute
+        ``<name>``.
+
+        Args:
+            name: Task name.
+            env: Task environment.
+
+        Returns:
+            Task instance.
+        """
+        task_cls = getattr(self, name)
+        return task_cls(self, env)
+
+    def run_task(self, name, **kwargs):
+        """Run task.
+
+        Args:
+            name: Task name.
+            **kwargs: Task environment.
+        """
+        env = self.create_env(**kwargs)
+        self.reporter.env = env
+        task = self.create_task(name, env)
+        try:
+            task.run()
+        except SkipProcessing:
+            pass
+        self.reporter.reset()
 
     def process_definition(self, content_db, definition):
+        """Process given definition (class, function, method etc).
+
+        Args:
+            content_db: :class:`ContentDb` instance.
+            definition: :class:`Definition` instance.
+        """
         with self.settings.from_key('style'):
-            env = self.create_env(content_db, definition=definition)
-            self.reporter.env = env
-            handler = self.create_definition_handler(env)
-
-            try:
-                handler.handle()
-            except SkipProcessing:
-                pass
-
-            self.reporter.reset()
+            self.run_task('definition_handler_task', content_db=content_db,
+                          report_filename=definition.filename,
+                          definition=definition)
 
     def sync_sources(self, content_db, out_filename=None):
         """Sync sources with content in the given DB.
 
         Args:
-            content_db: Content DB instance.
+            content_db: :class:`ContentDb` instance.
             out_filename: Output filename (set if there is only one file to
                 sync).
         """
         with self.settings.from_key('style'):
             for id, filename in content_db.get_domain_files(self):
-                env = self.create_env(content_db, file_id=id, filename=filename,
-                                      out_filename=out_filename)
-                handler = self.create_sync_handler(env)
-                try:
-                    handler.handle()
-                except SkipProcessing:
-                    pass
+                self.run_task('file_sync_task', content_db=content_db,
+                              report_filename=filename,
+                              file_id=id, filename=filename,
+                              out_filename=out_filename)

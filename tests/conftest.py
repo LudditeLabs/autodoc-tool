@@ -247,11 +247,13 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
         doc_block_docstring=text
     )
 
-
-
     db = Mock()
 
-    env = domain.create_env(db, definition=definition)
+    # TODO: simplify processing.
+
+    env = domain.create_env(content_db=db,
+                            report_filename=definition.filename,
+                            definition=definition)
     with context.settings.with_settings(domain.settings_section):
         with context.settings.from_key('style'):
 
@@ -264,7 +266,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
 
             domain.reporter.env = env
 
-            handler = domain.create_definition_handler(env)
+            handler = domain.definition_handler_task(domain, env)
             if not keep_transforms or 'transforms' in kw:
                 handler.transforms = kw.pop('transforms', None)
             handler.setup()
