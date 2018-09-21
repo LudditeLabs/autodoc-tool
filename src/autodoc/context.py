@@ -75,14 +75,21 @@ class Context(SettingsSpec):
                 with self.settings.with_settings(domain.settings_section):
                     domain.process_definition(content_db, definition)
 
-    def sync_sources(self, content_db):
+    def sync_sources(self, content_db, out_filename=None):
         """Sync sources with content in the given DB.
 
         Args:
             content_db: Content DB instance.
+            out_filename: Output filename. Ignored if there are multiple files
+                to sync.
         """
+        # If there are multiple files to sync then ignore this filename.
+        if out_filename:
+            if content_db.get_files_count():
+                out_filename = None
+
         for lang in content_db.get_languages():
             domain = self.domains.get(lang)
             if domain is not None:
                 with self.settings.with_settings(domain.settings_section):
-                    domain.sync_sources(content_db)
+                    domain.sync_sources(content_db, out_filename)

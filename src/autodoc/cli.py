@@ -77,6 +77,8 @@ def init(logger):
 @click.option('--out-db', type=click.Path(dir_okay=False),
               default='content.db', show_default=True,
               help='Output content DB.')
+@click.option('--out-filename', type=click.Path(dir_okay=False),
+              help='Output filename (only if input is a single file).')
 @click.option('--exclude', '-e', multiple=True, metavar='PATH',
               help='Files and/or dirs to exclude.')
 @click.option('--exclude-pattern', '-x', multiple=True, metavar='WILDCARD',
@@ -90,7 +92,7 @@ def init(logger):
 @click.argument('path', type=click.Path(exists=True), nargs=-1)
 @click.pass_context
 def cli(ctx, verbose, fix, builder, db, out_db, exclude, exclude_pattern,
-        config, dump_settings, s, path):
+        config, dump_settings, s, path, out_filename):
     """Autodoc tool."""
 
     logger = create_logger(verbose)
@@ -117,7 +119,7 @@ def cli(ctx, verbose, fix, builder, db, out_db, exclude, exclude_pattern,
         context.analyze(content_db)
         content_db.save_settings(settings_builder.settings)
         content_db.finalize()
-        context.sync_sources(content_db)
+        context.sync_sources(content_db, out_filename)
     except AutodocError as e:
         raise click.ClickException(str(e))
 

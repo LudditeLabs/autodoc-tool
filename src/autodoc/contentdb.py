@@ -348,6 +348,11 @@ class ContentDb:
         res = self.conn.execute('SELECT DISTINCT language FROM files')
         return [x[0] for x in res]
 
+    def get_files_count(self):
+        """Get number of files in DB."""
+        res = self.conn.execute('SELECT count(*) FROM files')
+        return int(res[0])
+
     def get_domain_files(self, domain):
         """Get files supported by the given domain.
 
