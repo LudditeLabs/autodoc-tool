@@ -133,8 +133,8 @@ class DomainReporter(BaseReporter):
     @env.setter
     def env(self, value):
         self._env = value
-        self.definition = value['definition']
-        self._filename = self.definition.filename
+        self.definition = value.get('definition')
+        self._filename = value.get('report_filename')
 
     def reset(self):
         super(DomainReporter, self).reset()
@@ -155,7 +155,7 @@ class DomainReporter(BaseReporter):
 
         path_item = [self._filename] if self._filename else []
 
-        if line is not None:
+        if line:
             # NOTE:
             # We +1 because all indexes and positions are assumed to be
             # zero-based and we display in 1-based format.
