@@ -84,9 +84,10 @@ class Context(SettingsSpec):
                 to sync.
         """
         # If there are multiple files to sync then ignore this filename.
-        if out_filename:
-            if content_db.get_files_count():
-                out_filename = None
+        # NOTE: temporary disabled until better SQL query.
+        # if out_filename:
+        #     if content_db.get_files_count():
+        #         out_filename = None
 
         for lang in content_db.get_languages():
             domain = self.domains.get(lang)
