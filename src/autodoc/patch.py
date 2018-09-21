@@ -155,13 +155,17 @@ class FilePatcher:
         """
         self._patcher.add(patch)
 
-    def patch(self):
-        """Apply patches and write changes to specified file."""
+    def patch(self, out_filename=None):
+        """Apply patches and write changes to specified file.
+
+        Args:
+            out_filename: Output filename. If not set then input one is used.
+        """
         in_ = FileInput(source_path=self._filename, encoding=self._encoding)
         content = in_.read()
         content = self._patcher.patch(content)
         content = '\n'.join(content)
 
-        out = FileOutput(destination_path=self._filename,
+        out = FileOutput(destination_path=out_filename or self._filename,
                          encoding=self._encoding)
         out.write(content)
