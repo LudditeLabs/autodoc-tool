@@ -73,7 +73,7 @@ class PythonDomain(LanguageDomain):
     settings_section = 'py'
     settings_spec_help = 'Python language.'
     settings_spec = LanguageDomain.settings_spec + (
-        ('Output docstring style.', 'style', 'rst'),
+        ('Output docstring style.', 'style', 'google'),
         ('Quote to use for docstrings.', 'docstring_quote', '"""'),
         (
             'List of sections in order of following in the docstring.',
