@@ -210,22 +210,22 @@ class LanguageDomain(SettingsSpec):
         """
         return self._styles_map.get(name)
 
-    def create_env(self, content_db, definition):
+    def create_env(self, content_db, **kwargs):
         """Create processing environment dict.
 
         Args:
             content_db: Content DB instance.
-            definition: Definition to process.
+            **kwargs: Extra env vars.
 
         Returns:
             Processing environment dict.
         """
         env = {
             'db': content_db,
-            'definition': definition,
             'reporter': self.reporter,
-            'settings': self.settings
+            'settings': self.settings,
         }
+        env.update(kwargs)
         return env
 
     def create_definition_handler(self, env):
@@ -233,11 +233,11 @@ class LanguageDomain(SettingsSpec):
 
     def process_definition(self, content_db, definition):
         with self.settings.from_key('style'):
-            env = self.create_env(content_db, definition)
+            env = self.create_env(content_db, definition=definition)
             self.reporter.env = env
+            handler = self.create_definition_handler(env)
 
             try:
-                handler = self.create_definition_handler(env)
                 handler.handle()
             except SkipProcessing:
                 pass
