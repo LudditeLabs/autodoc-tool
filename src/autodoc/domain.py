@@ -10,7 +10,38 @@ class SkipProcessing(Exception):
     pass
 
 
-class DefinitionHandler(SettingsSpec):
+class BaseHandler(SettingsSpec):
+    """Base class for handlers."""
+    def __init__(self, domain, env):
+        """Create handler.
+
+        Args:
+            domain: :class:`LanguageDomain` instance.
+            env: Processing environment dict.
+        """
+        self.domain = domain
+        self.env = env
+        self.settings = env['settings']
+
+    def setup(self):
+        """Setup handler."""
+        pass
+
+    def teardown(self):
+        """Tear down handler."""
+        self.env = None
+        self.domain = None
+
+    def do_handle(self):
+        raise NotImplementedError
+
+    def handle(self):
+        self.setup()
+        self.do_handle()
+        self.teardown()
+
+
+class DefinitionHandler(BaseHandler):
     """Base class for the definition handlers.
 
     "Definition" represents some entity like function, class, method etc.
@@ -29,8 +60,7 @@ class DefinitionHandler(SettingsSpec):
             domain: :class:`LanguageDomain` instance.
             env: Processing environment dict.
         """
-        self.domain = domain
-        self.env = env
+        super(DefinitionHandler, self).__init__(domain, env)
         self.definition = self.env['definition']
 
     def apply_styles(self):
@@ -58,15 +88,6 @@ class DefinitionHandler(SettingsSpec):
             builder = self.document_builder(self.env)
             self.definition.doc_block.document = builder.get_document()
 
-    def setup(self):
-        """Setup handler."""
-        pass
-
-    def teardown(self):
-        """Tear down handler."""
-        self.env = None
-        self.domain = None
-
     def apply_transforms(self):
         """Apply transforms on current document tree."""
         if self.transforms:
@@ -89,13 +110,11 @@ class DefinitionHandler(SettingsSpec):
         """Save changes made by the handler to content DB."""
         self.env['db'].save_doc_block(self.definition)
 
-    def handle(self):
-        self.setup()
+    def do_handle(self):
         self.build_document()
         self.apply_transforms()
         self.translate_document_to_docstring()
         self.save_changes()
-        self.teardown()
 
 
 class LanguageDomain(SettingsSpec):
