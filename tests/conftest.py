@@ -251,7 +251,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
 
     db = Mock()
 
-    env = domain.create_env(db, definition)
+    env = domain.create_env(db, definition=definition)
     with context.settings.with_settings(domain.settings_section):
         with context.settings.from_key('style'):
 
