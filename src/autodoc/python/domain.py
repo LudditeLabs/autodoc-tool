@@ -1,4 +1,9 @@
-from ..domain import SkipProcessing, LanguageDomain, DefinitionHandler
+from ..domain import (
+    SkipProcessing,
+    LanguageDomain,
+    DefinitionHandler,
+    SyncHandler
+)
 from .rst import RstStyle
 from .google import GoogleStyle
 from .numpy import NumpyStyle
@@ -59,6 +64,13 @@ class PyDefinitionHandler(DefinitionHandler):
             doc.end_col = None
 
 
+class PySyncHandler(SyncHandler):
+    def prepare(self, docblock):
+        # Surround docstring with quotes.
+        quote = self.settings['docstring_quote']
+        docblock.docstring = quote + docblock.docstring + quote
+
+
 class PythonDomain(LanguageDomain):
     name = 'python'
     extensions = ['.py', '.pyw']
@@ -96,12 +108,8 @@ class PythonDomain(LanguageDomain):
     )
 
     definition_handler = PyDefinitionHandler
+    sync_handler = PySyncHandler
     docstring_styles = (RstStyle, GoogleStyle, NumpyStyle)
 
     def __init__(self):
         super(PythonDomain, self).__init__()
-
-    def prepare_to_sync(self, docblock):
-        # Surround docstring with quotes.
-        quote = self.settings['docstring_quote']
-        docblock.docstring = quote + docblock.docstring + quote

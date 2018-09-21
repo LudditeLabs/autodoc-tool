@@ -117,6 +117,38 @@ class DefinitionHandler(BaseHandler):
         self.save_changes()
 
 
+class SyncHandler(BaseHandler):
+    def __init__(self, domain, env):
+        super(SyncHandler, self).__init__(domain, env)
+        self.file_id = self.env['file_id']
+        self.filename = self.env['filename']
+        self.patcher = None
+
+    def setup(self):
+        """Setup handler."""
+        super(SyncHandler, self).setup()
+        self.patcher = FilePatcher(self.filename)
+
+    def teardown(self):
+        filename = self.env.get('out_filename') or self.filename
+        self.patcher.patch(filename)
+        self.patcher = None
+        super(SyncHandler, self).teardown()
+
+    def prepare(self, docblock):
+        pass
+
+    def do_handle(self):
+        # Create patches.
+        for docblock in self.env['db'].get_doc_blocks(self.file_id):
+            self.prepare(docblock)
+            if docblock.docstring is not None:
+                patch = Patch(docblock.docstring, docblock.start_line,
+                              docblock.start_col, docblock.end_line,
+                              docblock.end_col)
+                self.patcher.add(patch)
+
+
 class LanguageDomain(SettingsSpec):
     #: Domain name (language).
     #:
@@ -171,6 +203,7 @@ class LanguageDomain(SettingsSpec):
     )
 
     definition_handler = None
+    sync_handler = None
     docstring_styles = None
 
     def __init__(self):
@@ -231,6 +264,9 @@ class LanguageDomain(SettingsSpec):
     def create_definition_handler(self, env):
         return self.definition_handler(self, env)
 
+    def create_sync_handler(self, env):
+        return self.sync_handler(self, env)
+
     def process_definition(self, content_db, definition):
         with self.settings.from_key('style'):
             env = self.create_env(content_db, definition=definition)
@@ -244,27 +280,20 @@ class LanguageDomain(SettingsSpec):
 
             self.reporter.reset()
 
-    def prepare_to_sync(self, docblock):
-        pass
-
-    def sync_sources(self, content_db):
+    def sync_sources(self, content_db, out_filename=None):
         """Sync sources with content in the given DB.
 
         Args:
             content_db: Content DB instance.
+            out_filename: Output filename (set if there is only one file to
+                sync).
         """
-
         with self.settings.from_key('style'):
             for id, filename in content_db.get_domain_files(self):
-                patcher = FilePatcher(filename)
-
-                # Create patches.
-                for docblock in content_db.get_doc_blocks(id):
-                    self.prepare_to_sync(docblock)
-                    if docblock.docstring is not None:
-                        patch = Patch(docblock.docstring, docblock.start_line,
-                                      docblock.start_col, docblock.end_line,
-                                      docblock.end_col)
-                        patcher.add(patch)
-
-                patcher.patch()
+                env = self.create_env(content_db, file_id=id, filename=filename,
+                                      out_filename=out_filename)
+                handler = self.create_sync_handler(env)
+                try:
+                    handler.handle()
+                except SkipProcessing:
+                    pass
