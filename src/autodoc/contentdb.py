@@ -350,7 +350,7 @@ class ContentDb:
 
     def get_files_count(self):
         """Get number of files in DB."""
-        res = self.conn.execute('SELECT count(*) FROM files')
+        res = self.conn.execute('SELECT count(*) FROM files').fetchone()
         return int(res[0])
 
     def get_domain_files(self, domain):
