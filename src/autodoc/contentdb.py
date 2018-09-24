@@ -299,11 +299,14 @@ class ContentDb:
         for row in res:
             # Get definition args.
             # NOTE: currently it can't detect specified types.
-            arg_res = self.conn.execute("""SELECT p.defname, p.type
+            arg_res = self.conn.execute("""SELECT p.defname, p.declname, p.type
             FROM memberdef_params m LEFT JOIN params p ON m.id_param=p.rowid
             WHERE m.id_memberdef=%d ORDER BY m.rowid
             """ % row[0])
-            args = tuple(Arg(x[0], None) for x in arg_res)
+            # NOTE: '**kwargs' is stored as (similar for *args):
+            # defname = NULL, declname='kwargs`, type='**'
+            args = tuple(Arg(x[2] + x[1], None) if x[1] else Arg(x[0], None)
+                         for x in arg_res)
             d = Definition(args, *row)
             yield d
 
