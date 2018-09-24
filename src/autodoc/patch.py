@@ -86,7 +86,7 @@ class LinePatcher:
                 indent = patch.start_col - 1
                 if indent:
                     offset = ' ' * indent
-                    patch_lines = [offset + x for x in patch.lines]
+                    patch_lines = [(offset + x if x else x) for x in patch.lines]
                 else:
                     patch_lines = patch.lines
                 pos = patch.start_line
@@ -112,7 +112,7 @@ class LinePatcher:
 
             if indent:
                 offset = ' ' * indent
-                patch_lines = [offset + x for x in patch.lines]
+                patch_lines = [(offset + x if x else x) for x in patch.lines]
             else:
                 patch_lines = patch.lines
 
