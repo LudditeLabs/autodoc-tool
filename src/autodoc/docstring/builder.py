@@ -39,7 +39,7 @@ class DocumentBuilder:
         """Get settings for the docutils components."""
         components = (self.parser, self.reader)
         defaults = dict(read_config_files=False, report_level=5,
-                        warning_stream=False)
+                        halt_level=10, warning_stream=False)
         opt_parser = OptionParser(components=components, defaults=defaults)
         return opt_parser.get_default_values()
 
