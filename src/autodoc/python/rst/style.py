@@ -4,10 +4,7 @@ from .translator import DocumentToRstTranslator
 from .transforms.add_fields import AddDocstringSections
 
 
-class RstStyle(DocstringStyle):
-    name = 'rst'
-    settings_section = name
-    settings_spec_help = 'reStructuredText docstring style.'
+class RstBaseStyle(DocstringStyle):
     settings_spec = (
         # TODO: have separate config for each admonition type.
         # TODO: add fake option to show generic name.
@@ -41,7 +38,14 @@ class RstStyle(DocstringStyle):
 
         ('Separate fields with blank line.', 'field_margin', False, (int, bool)),
         ('Separate options with blank line.', 'opt_margin', False),
+    )
 
+
+class RstStyle(RstBaseStyle):
+    name = 'rst'
+    settings_section = name
+    settings_spec_help = 'reStructuredText docstring style.'
+    settings_spec = RstBaseStyle.settings_spec + (
         (
             """
             Always have separate :type: for the :param: field.

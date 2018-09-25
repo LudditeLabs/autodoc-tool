@@ -1,5 +1,5 @@
-from ..style import DocstringStyle
 from .napoleon import Config
+from .rst.style import RstBaseStyle
 
 
 class NapoleonStyleTransform:
@@ -59,7 +59,7 @@ class NapoleonStyleTransform:
         return '\n'.join(lines)
 
 
-class NapoleonStyle(DocstringStyle):
+class NapoleonStyle(RstBaseStyle):
     """Pipeline to translate docstring document to Google style format."""
 
     docstring_transform_cls = None

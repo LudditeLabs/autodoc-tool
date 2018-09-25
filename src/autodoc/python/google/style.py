@@ -91,7 +91,7 @@ class GoogleStyle(NapoleonStyle):
 
     settings_section = name
     settings_spec_help = 'Google docstring style.'
-    settings_spec = (
+    settings_spec = NapoleonStyle.settings_spec + (
         ('Params section', 'params_label', 'Args',
          C('Args', 'Arguments', 'Parameters')),
 
