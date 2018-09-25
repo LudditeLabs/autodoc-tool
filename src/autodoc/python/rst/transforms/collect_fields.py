@@ -1,4 +1,4 @@
-from docutils.nodes import field_list, field, paragraph, Text
+from docutils.nodes import field_list, field, paragraph, Text, reference
 from ....docstring.transforms.field_sections import CollectSectionsBase
 from ....docstring import nodes as docstring_nodes
 from ....report import Codes
@@ -54,7 +54,22 @@ class CollectInfoFields(CollectSectionsBase):
                     continue
 
                 # <field><field_name>...</field_name><field_body/></field>
-                field_signature = el.children[0].children[0]
+
+                # If there are multiple children then probably param name
+                # contains some RST construction.
+                # Currently only reference construction is supported: <name>_
+                # TODO: test me.
+                if len(el.children[0]) > 1:
+                    field_signature_parts = []
+                    for e in el.children[0]:
+                        if isinstance(e, reference):
+                            field_signature_parts.append(e.astext() + '_')
+                        else:
+                            field_signature_parts.append(e.astext())
+                    field_signature = ' '.join(field_signature_parts)
+                else:
+                    field_signature = el.children[0].children[0]
+
                 parts = field_signature.split()
                 fieldname = parts.pop(0)
                 ok = self.call_handler(fieldname, el, fieldname=fieldname,
