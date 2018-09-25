@@ -18,7 +18,8 @@ class TestAgs:
             
             Args:
                 sender: Quis nostrud exercitation ullamco.
-                priority: In voluptate velit esse cillum dolore eu fugiat nulla.
+                priority: In voluptate velit esse cillum dolore
+                    eu fugiat nulla.
             """,
             expected="""
             Lorem ipsum dolor sit amet, consectetur adipiscing elit...
@@ -575,6 +576,53 @@ class TestAdmonitions:
                 
                 suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?
             """)
+    def test_note_complex(self, assert_py_doc):
+        assert_py_doc(
+            text="""Run merge and simulation for each file-list in :attr:`_filenames`.
+
+            Merge is performed by :class:`MergedPortfolioSimulator` in parallel
+            mode.
+
+            Notes:
+                How parallel processing happens:
+    
+                Worker creates simulator instances and pickles them in a temp files.
+                Then it returns pickled filenames to main process where simulators
+                gets restored from the files::
+    
+                    create -> pickle -> save to file -> filenames
+                        -> main process -> restore
+    
+                Another way is just pass instances via multiprocessing queue::
+    
+                    create -> pickle -> queue -> main process -> restore
+    
+                but it could consume a lot of memory while transferring data if
+                instances are heavy. So we use temp files instead of queue.
+            """,
+            expected="""
+            Run merge and simulation for each file-list in :attr:`_filenames`.
+
+            Merge is performed by :class:`MergedPortfolioSimulator` in parallel
+            mode.
+
+            Notes:
+                How parallel processing happens:
+    
+                Worker creates simulator instances and pickles them in a temp files.
+                Then it returns pickled filenames to main process where simulators
+                gets restored from the files::
+    
+                    create -> pickle -> save to file -> filenames
+                        -> main process -> restore
+    
+                Another way is just pass instances via multiprocessing queue::
+    
+                    create -> pickle -> queue -> main process -> restore
+    
+                but it could consume a lot of memory while transferring data if
+                instances are heavy. So we use temp files instead of queue.
+            """, settings=dict(line_width=72))
 
     def test_examples(self, assert_py_doc):
         assert_py_doc(
