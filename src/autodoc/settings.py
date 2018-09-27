@@ -241,7 +241,8 @@ class SettingsBuilder:
     The specification is used on external settings loading to validate values.
     """
 
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
         self.specs = {}
         self.settings = {}
         self._settings_stack = []

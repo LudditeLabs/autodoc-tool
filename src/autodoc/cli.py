@@ -98,7 +98,7 @@ def cli(ctx, verbose, fix, builder, db, out_db, exclude, exclude_pattern,
     logger = create_logger(verbose)
     context = init(logger)
 
-    settings_builder = SettingsBuilder()
+    settings_builder = SettingsBuilder(logger)
     settings_builder.collect(context)
 
     if config:
