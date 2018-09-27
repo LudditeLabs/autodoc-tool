@@ -292,9 +292,6 @@ class SettingsBuilder:
             spec = spec + (None,) * (4 - len(spec))
             doc, name, default, type_ = spec
 
-            if name in self.specs:
-                print('WARNING: Setting [%s] already present.' % name)
-
             if type_ is None:
                 type_ = type(default)
 
@@ -311,6 +308,11 @@ class SettingsBuilder:
                 s = ChoiceSpec(name, doc, type_.values)
             else:
                 s = Spec(name, doc, type_)
+
+            spec_existing = self.specs.get(name)
+            if spec_existing is not None and spec_existing.type != s.type:
+                self.logger.warn('WARNING: Setting [%s] already present and '
+                                 'has different type.', name)
 
             self.specs[name] = s
 
