@@ -340,12 +340,14 @@ class TestC:
 class TestSettingsBuilder:
     # Test: construction.
     def test_construct(self):
-        c = SettingsBuilder()
+        logger = Mock()
+        c = SettingsBuilder(logger)
         assert c.settings == {}
         assert c.specs == {}
+        assert c.logger is logger
 
     def test_add_specs(self):
-        c = SettingsBuilder()
+        c = SettingsBuilder(Mock())
 
         c.add_specs((
             ('help', 'intvar', 1),
@@ -377,7 +379,7 @@ class TestSettingsBuilder:
         assert spec.type == ('one', 'two')
 
     def test_add_specs_recursive(self):
-        c = SettingsBuilder()
+        c = SettingsBuilder(Mock())
 
         c.add_specs((
             ('help', 'intvar', 1),
@@ -436,7 +438,7 @@ class TestSettingsBuilder:
 
         spec1.settings_spec_nested = (spec2,)
 
-        c = SettingsBuilder()
+        c = SettingsBuilder(Mock())
         c.collect(spec1)
 
         assert c.settings == {
