@@ -23,7 +23,7 @@ class Patch:
             end_line: End line.
             end_col: End column.
         """
-        self.lines = as_lines(content)
+        self.lines = as_lines(content) if content is not None else None
         self.start_line = start_line
         self.start_col = start_col
         self.end_line = end_line
@@ -83,6 +83,7 @@ class LinePatcher:
         for patch in self._patches:
             # Insert lines.
             if patch.end_line is None:
+                assert patch.lines is not None
                 indent = patch.start_col - 1
                 if indent:
                     offset = ' ' * indent
@@ -110,14 +111,15 @@ class LinePatcher:
             else:
                 indent = col
 
-            if indent:
+            if indent and patch.lines is not None:
                 offset = ' ' * indent
                 patch_lines = [(offset + x if x else x) for x in patch.lines]
             else:
                 patch_lines = patch.lines
 
             if to_insert:
-                to_insert.extend(patch_lines)
+                if patch_lines is not None:
+                    to_insert.extend(patch_lines)
             else:
                 to_insert = patch_lines
 
@@ -126,9 +128,15 @@ class LinePatcher:
             if last_part and not last_part.isspace():
                 if first_indent:
                     last_part = ' ' * first_indent + last_part
-                to_insert.append(last_part)
+                if to_insert is not None:
+                    to_insert.append(last_part)
+                else:
+                    to_insert = [last_part]
 
-            lines[start:end] = to_insert
+            if to_insert is not None:
+                lines[start:end] = to_insert
+            else:
+                del lines[start:end]
 
         return lines
 

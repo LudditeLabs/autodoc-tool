@@ -18,6 +18,15 @@ class TestPatch:
         assert patch.end_line == 3
         assert patch.end_col == 4
 
+    # Test: construct with 'None' content.
+    def test_construct_none(self):
+        patch = Patch(None, 1, 2, 3, 4)
+        assert patch.lines is None
+        assert patch.start_line == 1
+        assert patch.start_col == 2
+        assert patch.end_line == 3
+        assert patch.end_col == 4
+
 
 # Test: LinePatcher class.
 class TestLinePatcher:
@@ -345,6 +354,55 @@ class TestPatching:
          xxx
          yyy
          line 3
+         line 4
+         line 5
+         """
+         ),
+
+        # Remove single line.
+        ([Patch(None, 2, 1, 2, 7)],
+         """
+         line 1
+         line 3
+         line 4
+         line 5
+         """
+         ),
+
+        # Remove multiple line.
+        ([Patch(None, 2, 1, 4, 7)],
+         """
+         line 1
+         line 5
+         """
+         ),
+
+        # Remove single line partially.
+        ([Patch(None, 2, 1, 2, 3)],
+         """
+         line 1
+         ne 2
+         line 3
+         line 4
+         line 5
+         """
+         ),
+
+        # Remove multiple lines partially.
+        ([Patch(None, 2, 1, 3, 3)],
+         """
+         line 1
+         ne 3
+         line 4
+         line 5
+         """
+         ),
+        # Remove multiple lines partially, starting from middle.
+        ([Patch(None, 2, 3, 3, 4)],
+         """
+         line 1
+         li
+         e 3
          line 4
          line 5
          """
