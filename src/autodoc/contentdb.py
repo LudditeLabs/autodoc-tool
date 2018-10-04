@@ -470,19 +470,33 @@ class ContentDb:
                      for x in arg_res)
         return args
 
-    def get_member_definitions(self, rowid=None):
-        """Get member definitions from the DB.
+    def get_constructor(self, compound_id):
+        """Get constructor definition for the given compound (class, struct).
 
         Args:
-            rowid: Optional definition ID in the DB. If not specified then
-                yields all member definitions. Otherwise *returns* single
-                definition with the specified ``rowid``.
+            compound_id: Compound ID.
+
+        Returns:
+            :class:`MemberDefinition` or ``None``.
+
+        See Also:
+            :meth:`get_member_definitions`.
+        """
+        gen = self.get_member_definitions(name='__init__', compound=compound_id)
+        return next(gen, None)
+
+    def get_member_definitions(self, name=None, compound=None):
+        """Get member definitions from the DB.
+
+        ``name`` and ``compound`` are used to get specific member definition
+        (both values must be specified).
+
+        Args:
+            name: Optional definition name.
+            compound: Optional parent compound ID.
 
         Yields:
             :class:`MemberDefinition`
-
-        Returns:
-            :class:`MemberDefinition` with specified `rowid` or ``None``.
         """
         sql = """SELECT
         m.rowid, m.refid, m.name, f.language, m.id_file, f.name,
@@ -503,15 +517,14 @@ class ContentDb:
         LEFT JOIN docblocks d ON d.refid=m.refid
         LEFT JOIN compounddef c ON m.id_compound = c.rowid
         """
-        if rowid is not None:
-            sql += ' WHERE m.rowid = %d' % rowid
+        if name and compound:
+            sql += ' WHERE m.name = "%s" AND m.id_compound = %d' % (name,
+                                                                    compound)
 
         for row in self.conn.execute(sql):
             doc = DocBlock(*row[-10:])
             args = self.get_args(row[0])
             definition = MemberDefinition(*row[:-10], doc, args)
-            if rowid is not None:
-                return definition
             yield definition
 
     def get_definitions(self):
@@ -525,7 +538,6 @@ class ContentDb:
         """
         yield from self.get_compound_definitions()
         yield from self.get_member_definitions()
-
 
     # TODO: save by chunks in transaction.
     def save_doc_block(self, definition):
