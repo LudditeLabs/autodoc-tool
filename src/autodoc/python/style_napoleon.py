@@ -1,5 +1,6 @@
 from .napoleon import Config
 from .rst.style import RstBaseStyle
+from ..contentdb import DefinitionType, MemberType
 
 
 class NapoleonStyleTransform:
@@ -67,6 +68,21 @@ class NapoleonStyle(RstBaseStyle):
     def __init__(self, domain):
         super(NapoleonStyle, self).__init__(domain)
         self._transform = self.docstring_transform_cls(domain.reporter)
+
+    def get_definition_type(self, definition):
+        """Helper method to get definition type name."""
+        if definition.type is DefinitionType.MEMBER:
+            if definition.is_method:
+                return 'method'
+            elif definition.is_function:
+                return 'function'
+            elif definition.kind in (MemberType.VARIABLE, MemberType.PROPERTY):
+                return 'attribute'
+        elif definition.type is DefinitionType.CLASS:
+            return 'class'
+
+        # By default it's function.
+        return 'function'
 
     def transform_docstring(self, text, env):
         definition = env['definition']

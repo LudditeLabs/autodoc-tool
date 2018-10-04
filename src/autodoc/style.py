@@ -64,15 +64,6 @@ class DocstringStyle(SettingsSpec):
         writer.write(document, out)
         return out.destination
 
-    def get_definition_type(self, definition):
-        """Helper method to get definition type name."""
-        # 0:define 1:function 2:variable 3:typedef 4:enum 5:enumvalue
-        # 6:signal 7:slot 8:friend 9:DCOP 10:property 11:event
-        if definition.kind in (1, 6, 7, 8):
-            return 'function'
-        elif definition.kind in (2, 10):
-            return 'attribute'
-
     def transform_docstring(self, text, env):
         """Transform given text.
 
