@@ -22,8 +22,18 @@ class SyncParametersWithSpec(DocumentTransform):
         # Do nothing if parameters specification is not set or
         # it's not a function/method.
         definition = self.env['definition']
-        if (definition.type is not DefinitionType.MEMBER
-                or not definition.is_function):
+
+        need_sync = False
+
+        if (definition.type is DefinitionType.CLASS
+                and definition.args is not None):
+            need_sync = True
+
+        elif (definition.type is DefinitionType.MEMBER
+              and definition.is_function):
+            need_sync = True
+
+        if not need_sync:
             return
 
         # Do nothing if sections are not collected.

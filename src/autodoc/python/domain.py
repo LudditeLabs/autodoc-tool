@@ -40,27 +40,96 @@ class PyDefinitionHandlerTask(DefinitionHandlerTask):
         #               # <- bodyend
         #   def bar_1():
         #       pass
-
+        #
         super(PyDefinitionHandlerTask, self).setup()
+
         # This is one line function, skip processing.
         if (self.definition.type is DefinitionType.MEMBER
                 and self.definition.bodyend - self.definition.bodystart <= 1):
             raise SkipProcessing
+
+        docstring_level = self.settings['class_docstring_level']
+
+        if docstring_level == 'self':
+            self.move_docstring_to_class()
+        elif docstring_level == 'init':
+            self.move_docstring_to_init()
+
+        # For all other values process class and __init__ separately.
+
         self.normalize_doc_block()
 
-    def normalize_doc_block(self):
+    def append_dostring(self, src, dest, copy_args=False):
+        """Append docstring from one definition to another.
+
+        Args:
+            src: Source definition.
+            dest: Destination definition.
+            copy_args: Copy args from the source.
+        """
+        if src:
+            if src.doc_block.docstring:
+                dest.doc_block.docstring = (
+                        (dest.doc_block.docstring or '')
+                        + '\n\n'
+                        + src.doc_block.docstring
+                )
+            if copy_args and src.args:
+                # Skip first 'self' arg
+                dest.args = src.args[1:]
+
+    def move_docstring_to_class(self):
+        """Combine class and ``__init__`` method docstrings and put result
+        to class docstring.
+
+        ``__init__`` method docstring is removed when the task processes
+        corresponding definition.
+        """
+
+        # If current definition is class then get __init__ docstring and append
+        # to the definition's one.
+        if self.definition.type is DefinitionType.CLASS:
+            ctor = self.db.get_constructor(self.definition.id)
+            self.append_dostring(src=ctor, dest=self.definition, copy_args=True)
+
+        # If current definition is __init__ method then set flag to skip
+        # processing and remove its docstring.
+        # The flag is used in DefinitionHandlerTask.do_run().
+        elif (self.definition.type is DefinitionType.MEMBER
+              and self.definition.name == '__init__'):
+            self.remove_docstring = True
+
+    def move_docstring_to_init(self):
+        if self.definition.type is DefinitionType.CLASS:
+            # Append class docstring to __init__ docstring then
+            # save __init__ doc block changes.
+            ctor = self.db.get_constructor(self.definition.id)
+            if ctor:
+                self.append_dostring(src=self.definition, dest=ctor)
+                self.normalize_doc_block(ctor)
+                self.db.save_doc_block(ctor)
+
+            # Remove class docstring.
+            self.remove_docstring = True
+
+        elif (self.definition.type is DefinitionType.MEMBER
+              and self.definition.name == '__init__'):
+            pass
+
+    def normalize_doc_block(self, definition=None):
         """Setup docblock indent."""
-        doc = self.definition.doc_block
+        definition = definition or self.definition
+        doc = definition.doc_block
         if doc.id is None:
-            doc.refid = self.definition.refid
-            doc.type = self.definition.type
-            doc.id_file = self.definition.id_file
-            if self.definition is DefinitionType.MEMBER:
-                doc.start_line = self.definition.bodystart
+            doc.refid = definition.refid
+            doc.type = definition.type
+            doc.id_file = definition.id_file
+            if definition is DefinitionType.MEMBER:
+                doc.start_line = definition.bodystart
             else:
-                doc.start_line = self.definition.start_line
+                doc.start_line = definition.start_line
             # TODO: detect indent.
-            doc.start_col = self.definition.start_col + 4
+            doc.start_col = definition.start_col + 4
             doc.end_line = None
             doc.end_col = None
 
@@ -68,8 +137,9 @@ class PyDefinitionHandlerTask(DefinitionHandlerTask):
 class PyFileSyncTask(FileSyncTask):
     def prepare(self, docblock):
         # Surround docstring with quotes.
-        quote = self.settings['docstring_quote']
-        docblock.docstring = quote + docblock.docstring + quote
+        if docblock.docstring is not None:
+            quote = self.settings['docstring_quote']
+            docblock.docstring = quote + docblock.docstring + quote
 
 
 class PythonDomain(LanguageDomain):
@@ -102,6 +172,16 @@ class PythonDomain(LanguageDomain):
                 'references',
             ]
         ),
+        ("""Where to put class docstring.
+        
+         The __init__ method may be documented in either the class level
+         docstring, or as a docstring on the __init__ method itself.
+
+         self - keep docstring in class, __init__ docstring is appended.
+         init - keep docstring in __init__, class docstring is prepended.
+         separate - process class and __init__ docstrings separately.
+         """,
+         'class_docstring_level', 'separate', C('self', 'init', 'separate')),
     )
 
     settings_spec_nested = LanguageDomain.settings_spec_nested + (

@@ -71,6 +71,13 @@ class DefinitionHandlerTask(BaseTask):
         """
         super(DefinitionHandlerTask, self).__init__(domain, env)
         self.definition = self.env['definition']
+        self.db = self.env['db']
+        self.remove_docstring = False
+
+    def teardown(self):
+        self.db = None
+        self.definition = None
+        super(DefinitionHandlerTask, self).teardown()
 
     def apply_styles(self):
         """Apply styles transforms to docstring before document building.
@@ -120,16 +127,19 @@ class DefinitionHandlerTask(BaseTask):
         self.env['db'].save_doc_block(self.definition)
 
     def do_run(self):
-        self.build_document()
-        self.apply_transforms()
-        self.translate_document_to_docstring()
+        if self.remove_docstring:
+            self.definition.doc_block.docstring = None
+        else:
+            self.build_document()
+            self.apply_transforms()
+            self.translate_document_to_docstring()
         self.save_changes()
 
 
 class FileSyncTask(BaseTask):
     """Base class for the file sync tasks.
 
-    This task takes content from DB, creates a patch and applies it to
+    This task takes content from DB, creates patches and applies them to
     destination file.
     """
     def __init__(self, domain, env):
@@ -159,10 +169,13 @@ class FileSyncTask(BaseTask):
         pass
 
     def do_run(self):
-        """Go over all docblocks for a specified file and create patches."""
+        """Go over all doc blocks for a specified file and create patches."""
         for docblock in self.env['db'].get_doc_blocks(self.file_id):
             self.prepare(docblock)
-            if docblock.docstring is not None:
+            # If docstring is present or we need to remove it then add patch.
+            if (docblock.docstring is not None
+                    or (docblock.end_line is not None
+                        and docblock.end_col is not None)):
                 patch = Patch(docblock.docstring, docblock.start_line,
                               docblock.start_col, docblock.end_line,
                               docblock.end_col)

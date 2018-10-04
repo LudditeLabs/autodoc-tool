@@ -269,7 +269,7 @@ class Definition:
 
 class CompoundDefinition(Definition):
     """This class represents a compound definition (like class or struct)."""
-    __slots__ = ['compound_type']
+    __slots__ = ['compound_type', 'args']
 
     def __init__(self, id, refid, name, language, id_file, filename,
                  start_line, start_col, compound_type, doc_block):
@@ -277,6 +277,9 @@ class CompoundDefinition(Definition):
             DefinitionType.CLASS, id, refid, name, language, id_file, filename,
             doc_block, start_line, start_col)
         self.compound_type = CompoundType.from_(compound_type)
+
+        # Optional constructor args.
+        self.args = None
 
 
 class MemberDefinition(Definition):
