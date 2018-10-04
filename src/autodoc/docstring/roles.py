@@ -36,7 +36,8 @@ def common_role(role, rawtext, text, lineno, inliner, options=None,
     """
     options = options if options is not None else {}
     roles.set_classes(options)
-    node = autodoc_unknown_role(rawtext, text, **options)
+    options['attributes'] = {'text': text}
+    node = autodoc_unknown_role(rawtext, rawtext, **options)
     node.role_name = role
     node.source, node.line = inliner.reporter.get_source_and_line(lineno)
     return [node], []
