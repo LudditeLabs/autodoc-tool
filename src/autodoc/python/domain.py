@@ -6,6 +6,8 @@ from .numpy import NumpyStyle
 from ..docstring.transforms.missing_docstring import MarkMissingDocstring
 from .rst.transforms.collect_fields import CollectInfoFields
 from .rst.transforms.sync_params import SyncParametersWithSpec
+from ..settings import C
+from ..contentdb import DefinitionType
 
 
 class PyDefinitionHandlerTask(DefinitionHandlerTask):
@@ -41,18 +43,22 @@ class PyDefinitionHandlerTask(DefinitionHandlerTask):
 
         super(PyDefinitionHandlerTask, self).setup()
         # This is one line function, skip processing.
-        if self.definition.bodyend - self.definition.bodystart <= 1:
+        if (self.definition.type is DefinitionType.MEMBER
+                and self.definition.bodyend - self.definition.bodystart <= 1):
             raise SkipProcessing
         self.normalize_doc_block()
 
     def normalize_doc_block(self):
+        """Setup docblock indent."""
         doc = self.definition.doc_block
         if doc.id is None:
-            doc.id_member = self.definition.id
-            # TODO: detect kind
-            doc.kind = 0                # 0:member 1:compound
+            doc.refid = self.definition.refid
+            doc.type = self.definition.type
             doc.id_file = self.definition.id_file
-            doc.start_line = self.definition.bodystart
+            if self.definition is DefinitionType.MEMBER:
+                doc.start_line = self.definition.bodystart
+            else:
+                doc.start_line = self.definition.start_line
             # TODO: detect indent.
             doc.start_col = self.definition.start_col + 4
             doc.end_line = None

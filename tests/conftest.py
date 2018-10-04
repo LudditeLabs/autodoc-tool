@@ -21,7 +21,7 @@ from unittest.mock import Mock
 from functools import partial
 from autodoc.utils import trim_docstring
 from autodoc.utils import side_by_side
-from autodoc.contentdb import Definition
+from autodoc.contentdb import MemberDefinition, DocBlock, MemberType
 from autodoc.context import Context
 from autodoc.report import DomainReporter
 from autodoc.settings import SettingsBuilder
@@ -65,7 +65,7 @@ def assert_lines(actual, expected):
 
 
 def create_definition(**kwargs):
-    doc = (
+    doc = DocBlock(
         1,      # rowid
         None,   # id_member
         None,   # kind
@@ -78,17 +78,18 @@ def create_definition(**kwargs):
         None,   # doc
     )
 
-    definition = Definition(
-        (),     # args
+    definition = MemberDefinition(
         1,      # id
         1,      # refid
         '',     # name
-        1,      # definition
-        1,      # type
-        '',     # argsstring
+        '',     # language
+        1,      # id_file
+        None,   # filename
+        1,      # start_line
+        1,      # start_col
+        'def',  # member_type
         '',     # scope
         None,   # initializer
-        None,   # bitfield
         None,   # read
         None,   # write
         0,      # visibility
@@ -126,19 +127,15 @@ def create_definition(**kwargs):
         0,      # addable
         0,      # removable
         0,      # raisable
-        0,      # kind
+        MemberType.FUNCTION,      # kind
         0,      # bodystart
         0,      # bodyend
         0,      # id_bodyfile
-        1,      # id_file
-        1,      # start_line
-        1,      # start_col
         None,   # inherited_from
         None,   # compound_id
         None,   # compound_kind
-        None,   # filename
-        '',     # language
-        *doc    # *other
+        doc,    # doc_block
+        (),     # args
     )
 
     for k, v in kwargs.items():
@@ -214,7 +211,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
     context = TestContext()
     context.register(domain)
 
-    settings_builder = SettingsBuilder()
+    settings_builder = SettingsBuilder(Mock())
     settings_builder.collect(context)
 
     # --- Testing defaults
@@ -235,7 +232,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
 
     definition = create_definition(
         name='test_func',
-        kind=1,
+        kind=kw.pop('kind', MemberType.FUNCTION),
         start_line=1,
         start_col=1,
         bodystart=1,
@@ -243,7 +240,7 @@ def parse_py_doc(text, settings=None, style='rst', defaultkw=None, trim=False,
         args=kw.get('args', ()),
         filename='<string>',
         compound_id=kw.pop('compound_id', None),
-        compound_kind=kw.pop('compound_kind', None),
+        compound_type=kw.pop('compound_type', None),
         doc_block_docstring=text
     )
 

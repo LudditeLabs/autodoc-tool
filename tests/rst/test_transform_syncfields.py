@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import logging
-from autodoc.contentdb import Arg
+from autodoc.contentdb import Arg, CompoundType
 from autodoc.python.rst.transforms.collect_fields import CollectInfoFields
 from autodoc.python.rst.transforms.sync_params import SyncParametersWithSpec
 from autodoc.report import Codes
@@ -289,7 +289,7 @@ class TestSyncParams:
 
         env = parse_py_doc(
             args=args,
-            compound_kind='class',  # Use method instead of function.
+            compound_type=CompoundType.CLASS,  # Use method instead of function.
             text="""
             This is an ordinary paragraph.
 

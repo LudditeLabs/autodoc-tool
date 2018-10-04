@@ -1,6 +1,7 @@
 from ....docstring.transforms.base import DocumentTransform
 from ....docstring import nodes as docstring_nodes
 from ....report import Codes
+from ....contentdb import DefinitionType
 
 
 class SyncParametersWithSpec(DocumentTransform):
@@ -20,11 +21,9 @@ class SyncParametersWithSpec(DocumentTransform):
     def apply(self, **kwargs):
         # Do nothing if parameters specification is not set or
         # it's not a function/method.
-
-        # 0:define 1:function 2:variable 3:typedef 4:enum 5:enumvalue
-        # 6:signal 7:slot 8:friend 9:DCOP 10:property 11:event
         definition = self.env['definition']
-        if definition.kind not in (1, 6, 7, 8):
+        if (definition.type is not DefinitionType.MEMBER
+                or not definition.is_function):
             return
 
         # Do nothing if sections are not collected.
@@ -58,7 +57,9 @@ class SyncParametersWithSpec(DocumentTransform):
 
         # For methods except static ones we ignore first argument (self or cls)
         # Static method has no such arg.
-        if args and definition.is_method and not definition.is_static:
+        if (args and definition.type is DefinitionType.MEMBER
+                and definition.is_method
+                and not definition.is_static):
             args = args[1:]
 
         for arg in args:
