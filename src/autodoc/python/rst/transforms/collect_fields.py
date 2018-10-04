@@ -4,7 +4,7 @@ from ....docstring import nodes as docstring_nodes
 from ....report import Codes
 
 
-# TODO: add 'var, ivar, cvar, vartype'.
+# TODO: add 'var, cvar + vartype'.
 # http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists
 class CollectInfoFields(CollectSectionsBase):
     """This transform collects info fields into sections.
@@ -32,7 +32,8 @@ class CollectInfoFields(CollectSectionsBase):
         self.set_handler_aliases('raises', ['raises', 'raise', 'except',
                                             'exception'])
         self.set_handler_aliases('param', ['param', 'parameter', 'arg',
-                                           'argument', 'key', 'keyword'])
+                                           'argument', 'key', 'keyword',
+                                           'ivar'])
         self.param_types_map = {}
         self.params_map = {}
         self.placed_info_field_marker = False
@@ -127,6 +128,8 @@ class CollectInfoFields(CollectSectionsBase):
 
         if fieldname in ('keyword', 'key'):
             section_name = 'keyword'
+        elif fieldname == 'ivar':
+            section_name = 'attributes'
         else:
             section_name = 'params'
 
@@ -191,13 +194,20 @@ class CollectInfoFields(CollectSectionsBase):
         # If type is specified before param this can help to recover
         # and link to correct param.
         # NOTE: Name is the same as for self.params_map, see process_param().
-        section_name = 'keyword' if fieldname == 'kwtype' else 'params'
+        if fieldname == 'kwtype':
+            section_name = 'keyword'
+        elif fieldname == 'vartype':
+            section_name = 'attributes'
+        else:
+            section_name = 'params'
+
         types = self.param_types_map.setdefault(section_name, dict())
         types.setdefault(param_name, []).append(node)
         # self.param_types_map.setdefault(param_name, []).append(node)
         self.add_to_remove(node)
 
     process_kwtype = process_type
+    process_vartype = process_type
 
     # :return: ...
     def process_return(self, node, fieldname, parts):
