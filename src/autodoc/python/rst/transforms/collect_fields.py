@@ -63,6 +63,8 @@ class CollectInfoFields(CollectSectionsBase):
                 if len(el.children[0]) > 1:
                     field_signature_parts = []
                     for e in el.children[0]:
+                        # Parameter name is <name>_ which is parsed as RST
+                        # reference. We should handle it as a plain text.
                         if isinstance(e, reference):
                             field_signature_parts.append(e.astext() + '_')
                         else:
@@ -252,6 +254,10 @@ class CollectInfoFields(CollectSectionsBase):
         # Check body.
         # :rtype: assumed to have simple paragraph with type or list of types.
         # No line breaks or complex formatting.
+        #
+        # NOTE: One more check performs in  add_type_from_node() method later.
+        # Here we just check if there more than one children (paragraphs).
+        #
         # TODO: what to do?
         # For now keep in the document.
         if len(node[1]) != 1:
@@ -272,7 +278,7 @@ class CollectInfoFields(CollectSectionsBase):
         if prev_node is None or not prev_node.get('is_return'):
             create_own_field = True
 
-        # :rtype: is placed after the field
+        # :rtype: is placed after :returns:
         else:
             section = self.get_docstring_section('returns')
             # Get last detected return and try to attach type to it.
@@ -283,6 +289,11 @@ class CollectInfoFields(CollectSectionsBase):
                     ret.add_type_from_node(node)
                 # Otherwise create separate field.
                 else:
+                    # NOTE: this case can't happen:
+                    # :rtype: is placed after :returns: and :returns: has type.
+                    # Because only :rtype: sets type. But we keep to not loose
+                    # type info in cases :returns: will have type somehow in
+                    # future (is that possible?)
                     create_own_field = True
 
         if create_own_field:
