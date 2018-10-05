@@ -713,6 +713,40 @@ class TestRaisesField:
         assert len(node) == 1
         assert len(node[0]) == 0
 
+    # Test: if :raises: contains multiple types (:raises Type1 Type2:) then
+    # generate multiple :raises: fields with single type.
+    def test_multiple(self, parse_py_doc):
+        env = parse_py_doc(
+            text="""
+            This is an ordinary paragraph.
+
+            :raises RuntimeError1 RuntimeError2: Generate multiple fields.
+
+            Ut enim ad minim veniam, quis nostrud.
+            """
+        )
+
+        doc = env['definition'].doc_block.document
+        assert hasattr(doc, 'field_sections')
+
+        section = doc.field_sections.get('raises')
+        assert section is not None
+        assert len(section) == 2
+
+        node = section[0]
+        assert node.get('type') == ['RuntimeError1']
+        assert node.get('orig_field_tag') == 'raises'
+        assert len(node) == 1
+        assert len(node[0]) == 1
+        assert node[0][0].astext() == 'Generate multiple fields.'
+
+        node = section[1]
+        assert node.get('type') == ['RuntimeError2']
+        assert node.get('orig_field_tag') == 'raises'
+        assert len(node) == 1
+        assert len(node[0]) == 1
+        assert node[0][0].astext() == 'Generate multiple fields.'
+
     def test_report(self, parse_py_doc):
         env = parse_py_doc(
             add_report=True,
@@ -724,6 +758,7 @@ class TestRaisesField:
             :raise TypeError: if the message_body is not a basestring
             :except RuntimeError:
             :exception RuntimeError2:
+            :raises RuntimeError1 RuntimeError2: this is incorrect!
 
             Ut enim ad minim veniam, quis nostrud.
             """
@@ -734,7 +769,7 @@ class TestRaisesField:
 
         report = env.get('reporter').report
         assert isinstance(report, list)
-        assert len(report) == 2
+        assert len(report) == 3
 
         assert len(report[0]) == 8
 
@@ -755,16 +790,22 @@ class TestRaisesField:
         path, domain, line, col, ref_name, level, code, msg = report[1]
         assert path == '<string>'   # conftest setup this.
         assert domain == 'python'
-
-        # NOTE: currently we drop position in the docstring
-        # and use position of the ref (function, class).
         assert line == 0
         assert col == 0
-
         assert ref_name == 'test_func'
         assert level == logging.INFO
         assert code == Codes.MISSING
         assert msg == 'Description is missing [:raises:]'
+
+        path, domain, line, col, ref_name, level, code, msg = report[2]
+        assert path == '<string>'   # conftest setup this.
+        assert domain == 'python'
+        assert line == 0
+        assert col == 0
+        assert ref_name == 'test_func'
+        assert level == logging.INFO
+        assert code == Codes.INCORRECT
+        assert msg == 'Incorrect signature [:raises:]'
 
     # Test: remove detected and invalid fields.
     def test_remove(self, assert_py_doc):

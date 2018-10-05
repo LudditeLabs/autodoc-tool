@@ -300,6 +300,7 @@ class CollectInfoFields(CollectSectionsBase):
     # :raises ValueError: ...
     def process_raises(self, node, fieldname, parts):
         rnode = docstring_nodes.raises_field(node, fieldname)
+        to_add = [rnode]
 
         num_parts = len(parts)
         # If it's :raises: without a type.
@@ -313,23 +314,29 @@ class CollectInfoFields(CollectSectionsBase):
                 return
 
         # If :raises Type: has extra text inside (:raises Type bla:)
-        # We move it to the description.
+        # We create multiple :raises: fields. Example:
+        #
+        #     :raises Type1 Type2: bla bla.
+        #
+        # converts to:
+        #
+        #     :raises Type1: bla bla.
+        #     :raises Type2: bla bla.
+        #
         elif num_parts > 1:
             self.reporter.add_report(
                 Codes.INCORRECT, 'Incorrect signature [:%s:]' % fieldname)
-            text = ' '.join(parts)
-            # Try to insert incorrect text into description to not lose it.
-            try:
-                add = text if text.endswith('.') else text + '.'
-                rnode[0][0].insert(0, Text(add + ' '))
-            except Exception as e:
-                rnode[0].insert(0, paragraph(text=text))
+            to_add = []
+            for p in parts:
+                n = docstring_nodes.raises_field(node, fieldname)
+                n['type'] = [p]
+                to_add.append(n)
 
         else:
             rnode['type'] = [parts[0]]
 
         section = self.get_docstring_section('raises', node)
-        section += rnode
+        section += to_add
 
         self.add_to_remove(node)
 
