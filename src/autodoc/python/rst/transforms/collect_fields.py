@@ -94,16 +94,10 @@ class CollectInfoFields(CollectSectionsBase):
         for section_name, types in self.param_types_map.items():
             section = params_map.get(section_name)
 
-            if section is None:
-                self.reporter.add_report(
-                    Codes.UNKNOWN, 'Unknown field section [%s]' % section_name)
-                continue
-
             for param_name, type_nodes in types.items():
-                param_node = section.get(param_name)
+                param_node = section.get(param_name) if section else None
 
                 if not param_node:
-                    type_node = type_nodes[0]
                     self.reporter.add_report(
                         Codes.UNKNOWN,
                         'Type for unknown parameter [%s]' % param_name)
