@@ -213,6 +213,102 @@ class TestParamField:
             expected="""This is an ordinary paragraph."""
         )
 
+    # Test: if specify type fields without params ones, then it will not create
+    # params field section.
+    # See CollectInfoFields.after_process().
+    def test_wrong_section(self, parse_py_doc):
+        env = parse_py_doc(
+            text="""
+            This is an ordinary paragraph.
+
+            :type noparam: xxx
+            """
+        )
+
+        doc = env['definition'].doc_block.document
+        assert hasattr(doc, 'field_sections')
+
+        report = env.get('reporter').report
+        assert isinstance(report, list)
+        assert len(report) == 1
+
+        for i, item in enumerate(report):
+            assert len(item) == 8, 'Report at %d.' % i
+
+        report.sort()
+
+        path, domain, line, col, func_name, level, code, msg = report[0]
+        assert path == '<string>'
+        assert domain == 'python'
+        assert line == 0
+        assert col == 0
+        assert func_name == 'test_func'
+        assert level == logging.INFO
+        assert code == Codes.UNKNOWN
+        assert msg == 'Type for unknown parameter [noparam]'
+
+
+# Test: :ivar:, :vartype:.
+class TestVarField:
+    # Test: parameters and their types.
+    def test_fields(self, parse_py_doc):
+        env = parse_py_doc(
+            text="""
+            This is an ordinary paragraph.
+
+            :ivar:
+            :vartype type_wrong_place: xxx
+            :ivar no_type: Lorem ipsum dolor sit amet.
+            
+            :ivar type_wrong_place: 123
+            :ivar str with_type: 321
+            
+            :ivar with_separate_type: Ut enim ad minim veniam,
+            :vartype with_separate_type: integer or None
+            """
+        )
+
+        doc = env['definition'].doc_block.document
+        assert hasattr(doc, 'field_sections')
+
+        section = doc.field_sections.get('attributes')
+        assert section is not None
+        assert len(section) == 4
+
+        # Parameter no_type.
+        param = section[0]
+        assert param.get('name') == 'no_type'
+        assert param.get('type') is None
+        assert param.get('orig_field_tag') == 'ivar'
+        assert len(param) == 1
+        assert len(param[0]) == 1
+        assert param[0][0].astext() == 'Lorem ipsum dolor sit amet.'
+
+        # Parameter type_wrong_place.
+        param = section[1]
+        assert param.get('name') == 'type_wrong_place'
+        assert param.get('type') == ['xxx']
+        assert param.get('orig_field_tag') == 'ivar'
+        assert len(param) == 1
+        assert len(param[0]) == 1
+
+        # Parameter with_type.
+        param = section[2]
+        assert param.get('name') == 'with_type'
+        assert param.get('type') == ['str']
+        assert param.get('orig_field_tag') == 'ivar'
+        assert len(param) == 1
+        assert len(param[0]) == 1
+        assert param[0][0].astext() == '321'
+
+        # Parameter with_separate_type.
+        param = section[3]
+        assert param.get('name') == 'with_separate_type'
+        assert param.get('type') == ['integer or None']
+        assert param.get('orig_field_tag') == 'ivar'
+        assert len(param) == 1
+        assert len(param[0]) == 1
+
 
 # Test: convert :keyword: and :kwtype: to <keyword_field> and move them to the
 # doc parts.
@@ -463,11 +559,15 @@ class TestReturnField:
             :return bla bla: Hz
             :return: the message id 2
             :return:
-            :rtype: int
+            :rtype: int, :obj:`my`
             :rtype: char
             :rtype bla: char
             :rtype: Do eiusmod tempor incididunt ut labore
                 et dolore magna aliqua.
+
+            :rtype: Line 1
+                
+                Line 2.
 
             Ut enim ad minim veniam, quis nostrud.
             """
@@ -478,7 +578,7 @@ class TestReturnField:
 
         report = env.get('reporter').report
         assert isinstance(report, list)
-        assert len(report) == 4
+        assert len(report) == 5
 
         for i, item in enumerate(report):
             assert len(item) == 8, 'Report at %d.' % i
@@ -518,6 +618,16 @@ class TestReturnField:
         assert msg == 'Incorrect signature [:rtype:]'
 
         path, domain, line, col, ref_name, level, code, msg = report[3]
+        assert path == '<string>'
+        assert domain == 'python'
+        assert line == 0
+        assert col == 0
+        assert ref_name == 'test_func'
+        assert level == logging.INFO
+        assert code == Codes.COMPLEX
+        assert msg == 'Type specification is too complex [:rtype:]'
+
+        path, domain, line, col, ref_name, level, code, msg = report[4]
         assert path == '<string>'
         assert domain == 'python'
         assert line == 0
