@@ -28,6 +28,9 @@ class TestParamField:
             :type with_separate_type: integer or None
             :type with_separate_type: string
             :type non_exist: str
+            
+            :param underscore_name_: Such name parsed as ``<reference>_`` RST
+                construction. But we should handle it as a plain text.
 
             This is a paragraph after the field list.
 
@@ -42,7 +45,7 @@ class TestParamField:
 
         section = doc.field_sections.get('params')
         assert section is not None
-        assert len(section) == 4
+        assert len(section) == 5
 
         # Parameter no_type.
         param = section[0]
@@ -76,6 +79,14 @@ class TestParamField:
         assert param.get('orig_field_tag') == 'parameter'
         assert len(param) == 1
         assert len(param[0]) == 2
+
+        # Parameter underscore_name_.
+        param = section[4]
+        assert param.get('name') == 'underscore_name_'
+        assert param.get('type') is None
+        assert param.get('orig_field_tag') == 'param'
+        assert len(param) == 1
+        assert len(param[0]) == 1
 
     # Test: report messages.
     def test_report(self, parse_py_doc):
