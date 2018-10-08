@@ -74,9 +74,7 @@ def init(logger):
               help='Content DB builder executable.')
 @click.option('--db', type=click.Path(dir_okay=False, exists=True),
               help='Content DB to process.')
-@click.option('--out-db', type=click.Path(dir_okay=False),
-              default='content.db', show_default=True,
-              help='Output content DB.')
+@click.option('--out-db', type=click.Path(dir_okay=False))
 @click.option('--out-filename', type=click.Path(dir_okay=False),
               help='Output filename (only if input is a single file).')
 @click.option('--exclude', '-e', multiple=True, metavar='PATH',
