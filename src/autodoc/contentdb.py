@@ -94,6 +94,9 @@ class ContentDbBuilder:
 
         temp_dir = tempfile.mkdtemp()
 
+        if not output:
+            output = op.join(temp_dir, 'content.db')
+
         cmd = [self._exe, '-T', temp_dir, '-o', output]
 
         if exclude:
