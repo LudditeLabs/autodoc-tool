@@ -423,8 +423,8 @@ class ContentDb:
 
         Args:
             rowid: Optional definition ID in the DB. If not specified then
-            yields all definitions. Otherwise *returns* single definition with
-            the specified ``rowid``.
+                yields all definitions. Otherwise *returns* single definition
+                with the specified ``rowid``.
 
         Yields:
             :class:`CompoundDefinition`
