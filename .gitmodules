@@ -1,0 +1,4 @@
+[submodule "src/contentdb"]
+	path = src/contentdb
+	url = git@github.com:LudditeLabs/doxygen.git
+	branch = autodoc-main
