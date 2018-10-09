@@ -41,7 +41,7 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     zip_safe=True,
-    license='',
+    license='Apache Software License',
     install_requires=[
         'click',
         'docutils',
@@ -54,6 +54,7 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
+        "License :: OSI Approved :: Apache Software License"
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Topic :: Documentation",
