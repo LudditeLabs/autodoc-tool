@@ -1,0 +1,28 @@
+run:
+  echo: yes
+
+build:
+  windows:
+    ssh:
+      host: 127.0.0.1
+      port: 31001
+      user: IEUser
+      password: Passw0rd!
+    box: autodoc-win10
+
+  macos:
+    ssh:
+      host: 127.0.0.1
+      port: 31002
+      user: vagrant
+      password: vagrant
+    box: autodoc-macos10.11
+
+  linux:
+    docker:
+      test-images:
+        - fedora:24
+        - ubuntu:14.04
+        - ubuntu:16.04
+        - debian:jessie
+        - debian:stretch
