@@ -29,6 +29,8 @@
             # Our version
             :raises ValueError: bla bla
             :raises Other: bla bla2
+
+        Modified by Sergey Kozlov <skozlovf@gmail.com>
 """
 
 from collections.abc import Callable
