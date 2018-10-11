@@ -450,7 +450,7 @@ class DumpSettings(object):
             if isinstance(obj, list):
                 stream.write('{}{}:\n'.format(offset, name))
                 for val in obj:
-                    stream.write('{}-{}\n'.format(offset, self.to_string(val)))
+                    stream.write('{}- {}\n'.format(offset, self.to_string(val)))
                 stream.write('\n')
             else:
                 stream.write('{}{}: {}\n\n'.format(offset, name,
