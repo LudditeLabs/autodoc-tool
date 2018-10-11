@@ -92,6 +92,8 @@ class DocumentToGoogleTranslator(DocumentToRstTranslator):
             # we create it to propagate top_margin to the next block.
             self.open_block(next=dict(top_margin=0))
         else:
+            if name.startswith('*'):
+                name = name.replace('*', r'\*')
             type_list = node.get('type')
             if type_list:
                 type_list = u', '.join(type_list)
