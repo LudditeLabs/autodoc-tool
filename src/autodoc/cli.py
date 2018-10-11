@@ -91,10 +91,10 @@ def init(logger):
 @click.option('--out-db', type=click.Path(dir_okay=False))
 @click.option('--out-filename', type=click.Path(dir_okay=False),
               help='Output filename (only if input is a single file).')
-@click.option('--exclude', '-e', multiple=True, metavar='PATH',
-              help='Files and/or dirs to exclude.')
-@click.option('--exclude-pattern', '-x', multiple=True, metavar='WILDCARD',
-              help='Exclude pattern.')
+@click.option('--exclude', '-e', cls=SettingsOption, multiple=True,
+              metavar='PATH', help='Files and/or dirs to exclude.')
+@click.option('--exclude-pattern', '-x', cls=SettingsOption, multiple=True,
+              metavar='WILDCARD', help='Exclude pattern.')
 @click.option('--config', '-c', help='Configuration file.',
               type=click.Path(dir_okay=False, exists=True))
 @click.option('--dump-config', is_flag=True, default=False,
