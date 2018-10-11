@@ -35,4 +35,5 @@ class TextWriter(Writer):
             if num_lines:
                 docstring = [u''] * num_lines
 
-        self.output = '\n'.join(docstring)
+        if docstring:
+            self.output = '\n'.join(docstring)
