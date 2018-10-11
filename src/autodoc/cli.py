@@ -114,6 +114,7 @@ def cli(ctx, verbose, fix, builder, db, out_db, exclude, exclude_pattern,
     settings_builder.collect(context)
 
     if config:
+        logger.info('Loading settings from %s', config)
         settings_builder.load_config(config)
     settings_builder.add_from_keyvalues(s)
 
