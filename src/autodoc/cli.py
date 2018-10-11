@@ -97,14 +97,16 @@ def init(logger):
               help='Exclude pattern.')
 @click.option('--config', '-c', help='Configuration file.',
               type=click.Path(dir_okay=False, exists=True))
-@click.option('--dump-settings', is_flag=True, default=False,
-              help='Dump settings and exit.')
+@click.option('--dump-config', is_flag=True, default=False,
+              help='Dump config and exit.')
+@click.option('--create-config', type=click.Path(dir_okay=False),
+              help='Create config file.')
 @click.option('-s', help='Overwrite a setting.', metavar='VAR=VALUE',
               multiple=True)
 @click.argument('path', type=click.Path(exists=True), nargs=-1)
 @click.pass_context
 def cli(ctx, verbose, fix, builder, db, out_db, exclude, exclude_pattern,
-        config, dump_settings, s, path, out_filename):
+        config, create_config, dump_config, s, path, out_filename):
     """Autodoc tool."""
 
     logger = create_logger(verbose)
@@ -113,12 +115,17 @@ def cli(ctx, verbose, fix, builder, db, out_db, exclude, exclude_pattern,
     settings_builder = SettingsBuilder(logger)
     settings_builder.collect(context)
 
+    if create_config:
+        with open(create_config, 'w') as f:
+            settings_builder.dump(f)
+        return
+
     if config:
         logger.info('Loading settings from %s', config)
         settings_builder.load_config(config)
     settings_builder.add_from_keyvalues(s)
 
-    if dump_settings:
+    if dump_config:
         settings_builder.dump(sys.stdout)
         return
 
