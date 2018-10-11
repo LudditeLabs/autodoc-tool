@@ -338,6 +338,7 @@ class SettingsBuilder:
             return
         run = cfg.pop('run', None)
         merge_recursive(self.settings, cfg, self.validate)
+        # NOTE: 'run' block is not supported yet.
         if run is not None:
             self.settings['run'] = run
 
