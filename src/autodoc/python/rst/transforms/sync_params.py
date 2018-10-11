@@ -89,13 +89,6 @@ class SyncParametersWithSpec(DocumentTransform):
         for arg in args:
             pos, param = param_map.pop(arg.name, na)
 
-            # Handle special params *args, **kwargs
-            if param is None and arg.name.startswith('*'):
-                name = arg.name.lstrip('*')
-                pos, param = param_map.pop(name, na)
-                # TODO: we also may add stars to the name: args -> *args
-                # param['name'] = arg.name
-
             # If param is not exists then create one.
             if param is None:
                 param = docstring_nodes.param_field(arg.name, None, 'param')
