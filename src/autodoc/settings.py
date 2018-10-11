@@ -333,7 +333,7 @@ class SettingsBuilder:
     def load_config(self, filename, fmt=None):
         # 'run' is special settings block. Used in cli.
         cfg = read_config_file(filename, fmt)
-        run = cfg.pop('run')
+        run = cfg.pop('run', None)
         merge_recursive(self.settings, cfg, self.validate)
         if run is not None:
             self.settings['run'] = run
