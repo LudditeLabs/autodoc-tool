@@ -17,6 +17,7 @@ from docutils.transforms import Transformer
 from .settings import SettingsSpec
 from .docstring.builder import DocumentBuilder
 from .patch import Patch, FilePatcher
+from .utils import trim_docstring
 
 
 class SkipProcessing(Exception):
@@ -93,28 +94,35 @@ class DefinitionHandlerTask(BaseTask):
         self.definition = None
         super(DefinitionHandlerTask, self).teardown()
 
-    def apply_styles(self):
+    def apply_styles(self, text):
         """Apply styles transforms to docstring before document building.
 
-        This method applies the transforms only if docstring exists and document
-        tree is not prebuilt.
+        Args:
+            text: Text to apply transforms on.
+
+        Returns:
+            Text transformed by styles.
+
+        Notes:
+            This method gets called only if docstring exists and document
+            tree is not prebuilt.
         """
-        doc_block = self.definition.doc_block
-        if doc_block.docstring is not None and doc_block.document is None:
-            text = doc_block.docstring
-            text = reduce(lambda t, f: f(t, self.env),
-                          self.domain._styles_transforms, text)
-            doc_block.docstring = text
+        text = reduce(lambda t, f: f(t, self.env),
+                      self.domain._styles_transforms, text)
+        return text
 
     def build_document(self):
         """Build document tree from the docstring stored in the ``env``.
 
         This method puts document tree to``definition.doc_block.document``.
         """
-        self.apply_styles()
-        # Don't parse docstring if document tree already present
+        # Don't parse docstring if document tree is already present
         # (if document is already present in the content DB).
-        if self.definition.doc_block.document is None:
+        doc_block = self.definition.doc_block
+        if doc_block.document is None:
+            if doc_block.docstring is not None:
+                text = trim_docstring(doc_block.docstring, as_string=True)
+                doc_block.docstring = self.apply_styles(text)
             builder = self.document_builder(self.env)
             self.definition.doc_block.document = builder.get_document()
 
