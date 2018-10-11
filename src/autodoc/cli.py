@@ -81,7 +81,7 @@ def init(logger):
 @click.version_option(version=__version__, message='%(version)s')
 @click.option('--verbose', '-v', is_flag=True, default=False, show_default=True,
               help='Verbose output.', cls=SettingsOption)
-@click.option('--fix/--no-fix', default=False, show_default=True,
+@click.option('--fix/--no-fix', default=True, show_default=True,
               help='Auto fix detected issues.', cls=SettingsOption)
 @click.option('--builder', '-b', metavar='EXE',
               type=click.Path(dir_okay=False, exists=True),
