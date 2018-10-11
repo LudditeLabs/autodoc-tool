@@ -83,7 +83,7 @@ def read_config_file(source, fmt=None):
     else:
         raise IOError('Unknown configuration format.')
 
-    if not isinstance(data, dict):
+    if data is not None and not isinstance(data, dict):
         raise ValueError('Not a dictionary.')
     return data
 
@@ -333,6 +333,9 @@ class SettingsBuilder:
     def load_config(self, filename, fmt=None):
         # 'run' is special settings block. Used in cli.
         cfg = read_config_file(filename, fmt)
+        if cfg is None:
+            self.logger.warn('WARNING: Empty configuration file')
+            return
         run = cfg.pop('run', None)
         merge_recursive(self.settings, cfg, self.validate)
         if run is not None:
